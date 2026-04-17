@@ -1,0 +1,43 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+
+<h1>Catalog</h1>
+
+<a href="{{ url_for('admin_add_route') }}"><button type="button">Add</button></a>
+
+<div class="catalog_cards">
+{% if catalog %}
+    {% for item in catalog %}
+    <div class="card admin-item-card" data-name="{{ item.name }}" data-price="{{ item.price }}" data-category="{{ item.category }}" data-image="{{ item.image }}" data-description="{{ item.description }}">
+        <strong>Item ID: {{ item.item_id }}</strong>
+        <img src="{{ url_for('static', filename=item.image) }}" alt="FTL">
+        <p>{{ item.name }}</p>
+        <p>Price: R{{ item.price }}</p>
+        <div class="button-row">
+        <a href="{{ url_for('edit_item_route', item_id=item.item_id, next=url_for('admin_catalog_route')) }}"><button type="button">Edit</button></a>
+        <a href="{{ url_for('delete_item_route', item_id=item.item_id) }}"><button type="button">Delete</button></a>
+        </div>
+    </div>
+    {% endfor %}
+{% else %}
+<div class="card">
+    <p>Nothing at the moment</p>
+</div>
+{% endif %}
+</div>
+
+<dialog id="admin-item-card-modal">
+    <div class="modal-media-layout">
+        <img src="" id="admin-item-image-modal" alt="FTL">
+        <div class="modal-copy">
+            <p id="admin-item-category-modal"></p>
+            <strong id="admin-item-name-modal"></strong>
+            <p id="admin-item-description-modal"></p>
+        </div>
+    </div>
+    <p id="admin-item-price-modal"></p>
+    <button type="button" id="admin-item-close-modal">Close</button>
+</dialog>
+
+{% endblock %}

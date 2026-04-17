@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Carol's Beauty Lounge{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav>
+        <div class="hamburger" id="hamburger">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        <div class="nav-links" id="nav-links">
+            <a href="{{ url_for('user_home_route') }}" class="{% if request.endpoint == 'user_home_route' %}active{% endif %}">Home</a>
+            <a href="{{ url_for('user_catalog_route') }}" class="{% if request.endpoint in ['user_catalog_route', 'filtered_catalog_route'] %}active{% endif %}">Catalog</a>
+            <a href="{{ url_for('user_booking_requests_route') }}" class="{% if request.endpoint == 'user_booking_requests_route' %}active{% endif %}">Booking Requests</a>
+            <a href="{{ url_for('user_about_route') }}" class="{% if request.endpoint == 'user_about_route' %}active{% endif %}">About Us</a>
+        </div>
+    </nav>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+<main>{% block content %}{% endblock %}</main>
+</body>
+</html>

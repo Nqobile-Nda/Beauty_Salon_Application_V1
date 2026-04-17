@@ -1,0 +1,85 @@
+{% extends "user/base.html" %}
+
+{% block content %}
+
+<h1>Catalog</h1>
+
+<div class="category-row-title page-links">
+    <h2>Hairstyles({{ hairstyles|length }})</h2>
+    <a href="{{ url_for('filtered_catalog_route', category='Hairstyles') }}">see more</a></div>
+<div class="category-row">
+
+{% if hairstyles %}
+    {% for item in hairstyles %}
+    <div class="card user-catalog-item-card" data-name="{{ item.name }}" data-category="{{ item.category }}" data-price="{{ item.price }}" data-image="{{ item.image }}" data-description="{{ item.description }}">
+        <img src="{{ url_for('static', filename=item.image) }}" alt="demo">
+        <strong>{{ item.name }}</strong>
+        <p>Price: R{{ item.price }}</p>
+    </div>
+    {% endfor %}
+{% else %}
+<div class="card">
+    <p>Nothing here at the moment</p>
+</div>
+{% endif %}
+</div>
+
+
+<div class="category-row-title page-links">
+    <h2>Wigs({{ wigs|length }})</h2>
+    <a href="{{ url_for('filtered_catalog_route', category='Wigs') }}">see more</a>
+</div>
+
+<div class="category-row">
+{% if wigs %}
+    {% for item in wigs %}
+        <div class="card user-catalog-item-card" data-name="{{ item.name }}" data-category="{{ item.category }}" data-price="{{ item.price }}" data-image="{{ item.image }}" data-description="{{ item.description }}">
+        <img src="{{ url_for('static', filename=item.image) }}" alt="demo">
+        <strong>{{ item.name }}</strong>
+        <p>Price: R{{ item.price }}</p>
+        </div>
+    {% endfor %}
+{% else %}
+<div class="card">
+    <p>Nothing here at the moment</p>
+</div>
+{% endif %}
+</div>
+
+
+<div class="category-row-title page-links">
+    <h2>Nails({{ nails | length }})</h2>
+    <a href="{{ url_for('filtered_catalog_route', category='Nails') }}">see more</a>
+</div>
+
+<div class="category-row">
+{% if nails %}
+    {% for item in nails %}
+        <div class="card user-catalog-item-card" data-name="{{ item.name }}" data-category="{{ item.category }}" data-price="{{ item.price }}" data-image="{{ item.image }}" data-description="{{ item.description }}">
+        <img src="{{ url_for('static', filename=item.image) }}" alt="demo">
+        <strong>{{ item.name }}</strong>
+        <p>Price: R{{ item.price }}</p>
+        </div>
+    {% endfor %}
+{% else %}
+<div class="card">
+    <p>Nothing here at the moment</p>
+</div>
+{% endif %}
+</div>
+
+
+<dialog id="user-item-card-modal">
+    <div class="modal-media-layout">
+        <img src="" id="user-item-image-modal" alt="FTL">
+        <div class="modal-copy">
+            <p id="user-item-category-modal"></p>
+            <strong id="user-item-name-modal"></strong>
+            <p id="user-item-description-modal"></p>
+        </div>
+    </div>
+    <p id="user-item-price-modal"></p>
+    <button type="button" id="user-item-close-modal">Close</button>
+</dialog>
+
+{% endblock %}

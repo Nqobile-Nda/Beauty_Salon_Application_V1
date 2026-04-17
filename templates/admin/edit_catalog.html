@@ -1,0 +1,30 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+
+<form method="POST">
+    <label>Item ID:</label>
+    <input name="item_id" title="item_id" value="{{ item.item_id }}" readonly>
+
+    <label>Name:</label>
+    <input name="item_name" title="item_name" value="{{ item.name }}" type="text">
+
+    <label>Price:</label>
+    <input name="item_price" title="item_price" value="{{ item.price }}" type="number">
+
+    <label>Category:</label>
+    <input name="item_category" title="item_category" value="{{ item.category }}">
+
+    <label>Picture:</label>
+    <input name="item_image" title="item_image" type="file" value="{{ item.image }}">
+
+    <label>Description:</label>
+    <input name="item_description" title="item_description" value="{{ item.description }}">
+
+    <div class="button-row">
+    <button type="submit">Edit</button>
+    <a href="{{ url_for('admin_catalog_route') }}"><button type="button">Cancel</button></a>
+    </div>
+</form>
+
+{% endblock %}

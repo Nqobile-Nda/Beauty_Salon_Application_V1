@@ -1,0 +1,50 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+
+<h1>Booking Requests</h1>
+<div class ="page-links">
+<a href="{{ url_for('admin_appointments_route') }}">Back</a>
+<a href="{{ url_for('admin_booking_requests_history_route') }}">History</a>
+</div>
+
+<div class="booking-request-row">
+{% for item in booking_requests %}
+    {% if item.get("status") == "Pending" %}
+    <div class="card booking-request-card" data-request_id="{{ item.request_id }}" data-name="{{ item.full_name }}" data-selected_service="{{ item.selected_service }}" data-email="{{ item.email }}" data-phone="{{ item.phone }}" data-message="{{ item.message }}" data-date="{{ item.date }}" data-time="{{ item.time }}" data-created_at="{{ item.created_at }}" data-created_by="{{ item.created_by }}">
+    <strong>{{ item.full_name }} </strong>
+    <p>Phone: {{ item.phone }} </p>
+    <p>created_at: {{ item.created_at }} </p>
+    <div class="button-row">
+        <button type="button" class="booking-request-accept">Accept</button>
+        <button type="button" class="booking-request-reject">Reject</button>
+    </div>
+    </div>
+    {% endif %}
+{% endfor %}
+</div>
+
+<dialog id="booking-request-confirm-modal">
+    <p id="booking-request-confirm-message-modal"></p>
+    <a id="booking-request-confirm-link" href="#"><button type="button" id="booking-request-confirm-accept-button">Confirm</button></a>
+    <button type="button" id="booking-request-confirm-cancel-button">Cancel</button>
+</dialog>
+
+
+<dialog id="booking-request-reject-modal">
+    <p id="booking-request-reject-message-modal"></p>
+    <a id="booking-request-decline-link" href="#"><button type="button" id="booking-request-reject-accept-button">Confirm</button></a>
+    <button type="button" id="booking-request-reject-cancel-button">Cancel</button>
+</dialog>
+
+
+<dialog id="booking-request-card-modal">
+    <p id="booking-request-selected-service-modal"></p>
+    <p id="booking-request-name-modal"></p>
+    <p id="booking-request-phone-modal"></p>
+    <p id="booking-request-email-modal"></p>
+    <p id="booking-request-message-modal"></p>
+    <button type="button" id="booking-request-card-modal-close">Close</button>
+</dialog>
+
+{% endblock %}

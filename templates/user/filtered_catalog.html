@@ -1,0 +1,37 @@
+{% extends "user/base.html" %}
+
+{% block content %}
+
+<h1>{{ name }}</h1>
+
+<div class="page-links">
+    <a href="{{ url_for('user_catalog_route') }}">Back to Catalog</a>
+</div>  
+
+{% if items %}
+<div class="user-filtered-catalog-grid">
+{% for item in items %}
+    <div class="card user-filtered-catalog-card" data-name="{{ item.name }}" data-category="{{ item.category }}" data-price="{{ item.price }}" data-image="{{ item.image }}" data-description="{{ item.description }}">
+        <img src="/static/{{ item.image }}" alt="FTL">
+        <strong>{{ item.name }}</strong>
+        <p>Price: R{{ item.price }}</p>
+    </div>
+{% endfor %}
+</div>
+
+{% else %}
+    <div class="card">
+        <p>Nothing here at the moment</p>
+    </div>
+{% endif %}
+
+<dialog id="user-filtered-catalog-modal">
+    <img src="" id="user-filtered-catalog-image-modal">
+    <p id="user-filtered-catalog-name-modal"></p>
+    <p id="user-filtered-catalog-category-modal"></p>
+    <p id="user-filtered-catalog-description-modal"></p>
+    <p id="user-filtered-catalog-price-modal"></p>
+    <button type="button" id="user-filter-catalog-close-modal">Close</button>
+</dialog>
+
+{% endblock %}

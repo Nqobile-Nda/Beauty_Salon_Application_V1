@@ -1,0 +1,34 @@
+{% extends "user/base.html" %}
+
+{% block content %}
+<h1>Booking Request</h1>
+<form method="POST">
+    <label>Chosen Service:</label>
+    <select name="selected-service" id="selected-service" title="selected-service" required>
+        <option value="" disabled {% if not selected_service %}selected{% endif %}>Choose a service:</option>
+        <option {% if selected_service == "Hairstyles" %}selected{% endif %}>Hairstyles</option>
+        <option {% if selected_service == "Wigs" %}selected{% endif %}>Wigs</option>
+        <option {% if selected_service == "Nails" %}selected{% endif %}>Nails</option>
+    </select>
+    
+    <label for="name">Full Name:</label>
+    <input type="text" id="name" name="full_name" required>
+
+    <label for="email">Email:</label>
+    <input type="email" id="email" name="email" required>
+
+    <label for="phone">Phone:</label>
+    <input type="tel" id="phone" name="phone" required>
+
+    <label for="date">Date:</label>
+    <input type="date" id="date" name="date" required>
+
+    <label for="time">Time:</label>
+    <input type="time" id="time" name="time" required>
+
+    <label>Message:</label>
+    <textarea type="text" name="message" id="message" title="message">Hello World</textarea>
+
+    <button type="submit">Book Now</button>
+</form>
+{% endblock %}

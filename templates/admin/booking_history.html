@@ -1,0 +1,20 @@
+{% extends "admin/base.html" %}
+
+{% block content %}
+
+<h1>Booking History</h1>
+
+<div class="page-links">
+    <a href="{{ url_for('admin_booking_requests_route') }}">Back</a>
+</div>
+
+<div class="booking-request-row">
+{% for item in booking_requests %}
+    <div class="card">
+        <p>{{ item.status }}</p>
+        <p>{{ item.full_name }}</p>
+    </div>
+{% endfor %}
+</div>
+
+{% endblock %}
