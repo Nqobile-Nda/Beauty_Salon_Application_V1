@@ -26,7 +26,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (itemCard.length && itemCardModal && itemCategoryModal && itemNameModal && itemPriceModal && itemDescriptionModal && itemCloseButton) {
         itemCard.forEach(card => {
-            card.addEventListener("click", () => {
+            card.addEventListener("click", (event) => {
+                event.stopPropagation();
                 itemImageModal.src = "/static/" + card.dataset.image;
                 itemCategoryModal.textContent = `Category: ${card.dataset.category}`;
                 itemNameModal.textContent = `Name: ${card.dataset.name}`;
