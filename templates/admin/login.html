@@ -6,10 +6,10 @@
     <form method="POST">
     <h1>Admin Login</h1>
     <label>Username:</label>
-    <input name="username" title="username">
+    <input name="username" title="username" value="user">
 
     <label>Password:</label>
-    <input name="password" title="password" type="password">
+    <input name="password" title="password" type="password" value="password">
     <button type="submit">Login</button>
     <div class="page-links"><a href="{{ url_for('user_home_route') }}">Not an admin?</a></div>
     </form>
