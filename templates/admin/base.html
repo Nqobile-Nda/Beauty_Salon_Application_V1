@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
+    {% if request.endpoint not in ['admin_login_route', 'admin_logout_route'] %}
     <nav>
         <div class="hamburger" id="hamburger">
             <span></span>
@@ -37,9 +38,10 @@
         {% endif %}
     {% endwith %}
         
-
+{% endif %}
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 <main>{% block content %}{% endblock %}</main>
+
 </body>
 </html>
 
