@@ -34,4 +34,13 @@
     <button type="button" id="appointment-close-modal">Close</button>
 </dialog>
 
+<dialog id="appointment-status-completed-modal">
+    <p></p>
+    <a href="{{ url_for('admin_complete_appointment_route') }}">Complete Appointment</a>
+</dialog>
+
+<dialog id="appointment-status-cancelled-modal">
+    <p></p>
+    <a href="{{ url_for('admin_cancel_appointment_route') }}">Cancel Appointment</a>
+</dialog>
 {% endblock %}
