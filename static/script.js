@@ -1,9 +1,11 @@
 document.addEventListener("DOMContentLoaded", () => {
     const hamburger = document.getElementById("hamburger");
     const navLinks = document.getElementById("nav-links");
-    hamburger.addEventListener("click", () => {
-        navLinks.classList.toggle("open");
-    });
+    if (hamburger && navLinks) {
+        hamburger.addEventListener("click", () => {
+            navLinks.classList.toggle("open");
+        });
+    }
 
 
     const flashContainer = document.getElementById("flash-container");
@@ -93,16 +95,22 @@ document.addEventListener("DOMContentLoaded", () => {
     const userFilteredCatalogPriceModal = document.getElementById("user-filtered-catalog-price-modal");
     const userFilteredCatalogCloseButton = document.getElementById("user-filter-catalog-close-modal");
 
-    userFilteredCatalogCard.forEach(card => {
-        card.addEventListener("click", () => {
-            userFilteredCatalogImageModal.src ="/static/" + card.dataset.image;
-            userFilteredCatalogModal.showModal();
+    if (userFilteredCatalogCard.length && userFilteredCatalogModal && userFilteredCatalogImageModal && userFilteredCatalogCloseButton) {
+        userFilteredCatalogCard.forEach(card => {
+            card.addEventListener("click", () => {
+                userFilteredCatalogImageModal.src = "/static/" + card.dataset.image;
+                userFilteredCatalogNameModal.textContent = card.dataset.name;
+                userFilteredCatalogCategoryModal.textContent = `Category: ${card.dataset.category}`;
+                userFilteredCatalogDescriptionModal.textContent = `Description: ${card.dataset.description}`;
+                userFilteredCatalogPriceModal.textContent = `Price: R${card.dataset.price}`;
+                userFilteredCatalogModal.showModal();
+            });
         });
-    });
 
-    userFilteredCatalogCloseButton.addEventListener("click", () => {
-        userFilteredCatalogModal.close();
-    });
+        userFilteredCatalogCloseButton.addEventListener("click", () => {
+            userFilteredCatalogModal.close();
+        });
+    }
     
 
     const bookingRequestCard = document.querySelectorAll(".booking-request-card");
