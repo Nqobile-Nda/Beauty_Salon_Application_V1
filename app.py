@@ -1,5 +1,5 @@
 from flask import Flask, render_template, url_for, request, redirect, flash, get_flashed_messages, session
-from data_manager import load_catalog, add_item, generate_item_id, update_item, delete_item, filtered_catalog, add_user_booking_requests, load_user_booking_requests, generate_booking_request_id, load_appointments, create_appointment, generate_appointment_id, decline_appointment_status
+from data_manager import load_catalog, add_item, generate_item_id, update_item, delete_item, filtered_catalog, add_user_booking_requests, load_user_booking_requests, generate_booking_request_id, load_appointments, create_appointment, generate_appointment_id, decline_appointment_status, cancel_appointment_status, accept_appointment_status, complete_appointment_status
 import time
 import os
 from dotenv import load_dotenv
@@ -154,6 +154,7 @@ def admin_create_appointment_route():
         return redirect(url_for('admin_login_route', next='admin_create_appointment_route'))
 
     if request.method == "POST":
+        appointment_id, _ = generate_appointment_id()
         selected_service = request.form.get("selected-service")
         full_name = request.form.get("full_name")
         email = request.form.get("email")
@@ -165,6 +166,7 @@ def admin_create_appointment_route():
         created_by = "admin"
 
         admin_created_appointment = {
+            "appointment_id": appointment_id,
             "selected_service": selected_service,
             "full_name": full_name,
             "email": email,
@@ -179,6 +181,30 @@ def admin_create_appointment_route():
         create_appointment(admin_created_appointment)
         return redirect(url_for("admin_appointments_route"))
     return render_template("admin/create_appointment.html")   
+
+
+@app.route("/admin_appointments/cancel/<int:appointment_id>")
+def admin_cancel_appointment_route(appointment_id):
+    if "user" not in session:
+        return redirect(url_for('admin_login_route', next='admin_cancel_appointment_route', appointment_id=appointment_id))
+
+    if cancel_appointment_status(appointment_id):
+        flash("Appointment cancelled.", "success")
+    else:
+        flash("Appointment not found.", "error")
+    return redirect(url_for('admin_appointments_route'))
+
+
+@app.route("/admin_appointments/complete/<int:appointment_id>")
+def admin_complete_appointment_route(appointment_id):
+    if "user" not in session:
+        return redirect(url_for('admin_login_route', next='admin_complete_appointment_route', appointment_id=appointment_id))
+
+    if complete_appointment_status(appointment_id):
+        flash("Appointment completed.", "success")
+    else:
+        flash("Appointment not found.", "error")
+    return redirect(url_for('admin_appointments_route'))
 
 
 @app.route("/admin_booking_requests")
@@ -205,6 +231,9 @@ def admin_booking_request_accept_route(request_id):
         return redirect(url_for('admin_login_route', next='admin_booking_request_accept_route', request_id=request_id))
     user_booking_requests = load_user_booking_requests()
     booking_request = next((item for item in user_booking_requests if item.get("request_id") == request_id), None)
+    if booking_request is None:
+        flash("Booking request not found.", "error")
+        return redirect(url_for("admin_booking_requests_route"))
     appointment_id, _ = generate_appointment_id()
     appointment_details = {
             "appointment_id": appointment_id,
@@ -220,7 +249,9 @@ def admin_booking_request_accept_route(request_id):
             "created_by": booking_request["created_by"]
         }
     create_appointment(appointment_details)
-    return render_template("admin/booking_requests.html", booking_request=booking_request)
+    accept_appointment_status(request_id)
+    flash("Booking request accepted.", "success")
+    return redirect(url_for("admin_appointments_route"))
 
 
 @app.route("/admin_booking_requests/decline/<int:request_id>")
