@@ -14,9 +14,11 @@
 {% for item in appointments %}
 <div class="card appointment-card" data-appointment-id="{{ item.appointment_id }}" data-request-id="{{ item.request_id }}" data-name="{{ item.full_name }}" data-service="{{ item.selected_service }}" data-email="{{ item.email }}" data-phone="{{ item.phone }}" data-date="{{ item.date }}" data-time="{{ item.time }}" data-message="{{ item.message }}" data-created-by="{{ item.created_by }}">
     <p>{{ item.full_name }}</p>
+    <p>{{ item.selected_service }}</p>
     <p>{{ item.date}} {{ item.time }}</p>
     <div class="button-row">
-    <button type="button">Completed</button><button type="button">Canceled</button>
+    <button type="button" class="appointment-complete">Completed</button>
+    <button type="button" class="appointment-cancel">Canceled</button>
     </div>
 </div>
 {% endfor %}
@@ -35,12 +37,14 @@
 </dialog>
 
 <dialog id="appointment-status-completed-modal">
-    <p></p>
-    <a href="{{ url_for('admin_complete_appointment_route') }}">Complete Appointment</a>
+    <p id="appointment-status-completed-message-modal"></p>
+    <a id="appointment-complete-link" href="#"><button type="button">Complete Appointment</button></a>
+    <button type="button" id="appointment-complete-cancel-modal">Cancel</button>
 </dialog>
 
 <dialog id="appointment-status-cancelled-modal">
-    <p></p>
-    <a href="{{ url_for('admin_cancel_appointment_route') }}">Cancel Appointment</a>
+    <p id="appointment-status-cancelled-message-modal"></p>
+    <a id="appointment-cancel-link" href="#"><button type="button">Cancel Appointment</button></a>
+    <button type="button" id="appointment-cancel-cancel-modal">Keep Appointment</button>
 </dialog>
 {% endblock %}

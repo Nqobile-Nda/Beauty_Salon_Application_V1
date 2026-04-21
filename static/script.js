@@ -11,22 +11,22 @@ document.addEventListener("DOMContentLoaded", () => {
     const flashContainer = document.getElementById("flash-container");
 
     if (flashContainer) {
-    setTimeout(() => {
-        flashContainer.style.display = "none";
-    }, 3000);
+        setTimeout(() => {
+            flashContainer.style.display = "none";
+        }, 3000);
     }
 
 
     const itemCard = document.querySelectorAll(".admin-item-card");
     const itemCardModal = document.getElementById("admin-item-card-modal");
-    const itemImageModal = document.getElementById("admin-item-image-modal")
+    const itemImageModal = document.getElementById("admin-item-image-modal");
     const itemCategoryModal = document.getElementById("admin-item-category-modal");
     const itemNameModal = document.getElementById("admin-item-name-modal");
     const itemPriceModal = document.getElementById("admin-item-price-modal");
     const itemDescriptionModal = document.getElementById("admin-item-description-modal");
     const itemCloseButton = document.getElementById("admin-item-close-modal");
 
-    if (itemCard.length && itemCardModal && itemCategoryModal && itemNameModal && itemPriceModal && itemDescriptionModal && itemCloseButton) {
+    if (itemCard.length && itemCardModal && itemImageModal && itemCategoryModal && itemNameModal && itemPriceModal && itemDescriptionModal && itemCloseButton) {
         itemCard.forEach(card => {
             card.addEventListener("click", (event) => {
                 event.stopPropagation();
@@ -68,7 +68,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const userCardCloseButton = document.getElementById("user-item-close-modal");
     const userCardImageModal = document.getElementById("user-item-image-modal");
 
-    if (userItemCard.length && userCardModal && userCardCategoryModal && userCardNameModal && userCardPriceModal && userCardDescriptionModal && userCardCloseButton) {
+    if (userItemCard.length && userCardModal && userCardImageModal && userCardCategoryModal && userCardNameModal && userCardPriceModal && userCardDescriptionModal && userCardCloseButton) {
         userItemCard.forEach(card => {
             card.addEventListener("click", () => {
                 userCardImageModal.src = "/static/" + card.dataset.image;
@@ -95,10 +95,30 @@ document.addEventListener("DOMContentLoaded", () => {
     const userFilteredCatalogPriceModal = document.getElementById("user-filtered-catalog-price-modal");
     const userFilteredCatalogCloseButton = document.getElementById("user-filter-catalog-close-modal");
 
+<<<<<<< HEAD
     if (userFilteredCatalogCard.length && userFilteredCatalogModal && userFilteredCatalogImageModal && userFilteredCatalogCloseButton) {
         userFilteredCatalogCard.forEach(card => {
             card.addEventListener("click", () => {
                 userFilteredCatalogImageModal.src ="/static/" + card.dataset.image;
+=======
+    if (
+        userFilteredCatalogCard.length &&
+        userFilteredCatalogModal &&
+        userFilteredCatalogImageModal &&
+        userFilteredCatalogNameModal &&
+        userFilteredCatalogCategoryModal &&
+        userFilteredCatalogDescriptionModal &&
+        userFilteredCatalogPriceModal &&
+        userFilteredCatalogCloseButton
+    ) {
+        userFilteredCatalogCard.forEach(card => {
+            card.addEventListener("click", () => {
+                userFilteredCatalogImageModal.src = "/static/" + card.dataset.image;
+                userFilteredCatalogNameModal.textContent = card.dataset.name;
+                userFilteredCatalogCategoryModal.textContent = `Category: ${card.dataset.category}`;
+                userFilteredCatalogDescriptionModal.textContent = `Description: ${card.dataset.description}`;
+                userFilteredCatalogPriceModal.textContent = `Price: R${card.dataset.price}`;
+>>>>>>> CBL_V2
                 userFilteredCatalogModal.showModal();
             });
         });
@@ -146,7 +166,7 @@ document.addEventListener("DOMContentLoaded", () => {
         bookingRequestAccept.forEach(confirmButton => {
             confirmButton.addEventListener("click", (event) => {
                 event.stopPropagation();
-                bookingRequestConfirmMessageModal.textContent = `Accept Booking for ${confirmButton.closest(".booking-request-card").dataset.name}?`
+                bookingRequestConfirmMessageModal.textContent = `Accept Booking for ${confirmButton.closest(".booking-request-card").dataset.name}?`;
                 
                 const request_id = confirmButton.closest(".booking-request-card").dataset.request_id;
                 bookingRequestConfirmLink.href = `/admin_booking_requests/accept/${request_id}`;
@@ -167,16 +187,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const bookingRequestRejectModal = document.getElementById("booking-request-reject-modal");
     const bookingRequestRejectMessageModal = document.getElementById("booking-request-reject-message-modal");
     const bookingRequestRejectCancelButton = document.getElementById("booking-request-reject-cancel-button");
-    const bookingRequestDeclinkLink = document.getElementById("booking-request-decline-link")
+    const bookingRequestDeclinkLink = document.getElementById("booking-request-decline-link");
 
     if (bookingRequestReject.length && bookingRequestRejectModal && bookingRequestRejectMessageModal && bookingRequestRejectCancelButton && bookingRequestDeclinkLink) {
         bookingRequestReject.forEach(rejectButton => {
             rejectButton.addEventListener("click", (event) => {
                 event.stopPropagation();
-                bookingRequestRejectMessageModal.textContent = `Reject Booking for ${rejectButton.closest(".booking-request-card").dataset.name}?`
+                bookingRequestRejectMessageModal.textContent = `Reject Booking for ${rejectButton.closest(".booking-request-card").dataset.name}?`;
 
                 const request_id = rejectButton.closest(".booking-request-card").dataset.request_id;
-                bookingRequestDeclinkLink.href = `admin_booking_requests/decline/${request_id}`;
+                bookingRequestDeclinkLink.href = `/admin_booking_requests/decline/${request_id}`;
 
                 bookingRequestRejectModal.showModal();
             });
@@ -200,6 +220,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const appointmentCloseModal = document.getElementById("appointment-close-modal");
     const appointmentCompleteButtons = document.querySelectorAll(".appointment-complete");
     const appointmentCancelButtons = document.querySelectorAll(".appointment-cancel");
+<<<<<<< HEAD
     const appointmentStatusCompletedModal = document.getElementById("appointment-status-completed-modal");
     const appointmentStatusCancelledModal = document.getElementById("appointment-status-cancelled-modal");
     const appointmentStatusCompletedMessageModal = document.getElementById("appointment-status-completed-message-modal");
@@ -207,6 +228,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const appointmentCompleteLink = document.getElementById("appointment-complete-link");
     const appointmentCancelLink = document.getElementById("appointment-cancel-link");
     const appointmentCompleteCancelModal = document.getElementById("appointment-complete-cancel-modal");
+=======
+    const appointmentCompleteModal = document.getElementById("appointment-status-completed-modal");
+    const appointmentCompleteMessageModal = document.getElementById("appointment-status-completed-message-modal");
+    const appointmentCompleteLink = document.getElementById("appointment-complete-link");
+    const appointmentCompleteCancelModal = document.getElementById("appointment-complete-cancel-modal");
+    const appointmentCancelModal = document.getElementById("appointment-status-cancelled-modal");
+    const appointmentCancelMessageModal = document.getElementById("appointment-status-cancelled-message-modal");
+    const appointmentCancelLink = document.getElementById("appointment-cancel-link");
+>>>>>>> CBL_V2
     const appointmentCancelCancelModal = document.getElementById("appointment-cancel-cancel-modal");
 
     if (appointmentCard.length && appointmentModal && appointmentIdModal && appointmentServiceModal && appointmentNameModal && appointmentEmailModal && appointmentPhoneModal && appointmentDateTimeModal && appointmentMessageModal && appointmentCloseModal) {
@@ -228,6 +258,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+<<<<<<< HEAD
     if (appointmentCompleteButtons.length && appointmentStatusCompletedModal && appointmentStatusCompletedMessageModal && appointmentCompleteLink && appointmentCompleteCancelModal) {
         appointmentCompleteButtons.forEach(button => {
             button.addEventListener("click", (event) => {
@@ -237,10 +268,32 @@ document.addEventListener("DOMContentLoaded", () => {
                 appointmentStatusCompletedMessageModal.textContent = `Mark appointment for ${card.dataset.name} as completed?`;
                 appointmentCompleteLink.href = `/admin_appointments/complete/${appointmentId}`;
                 appointmentStatusCompletedModal.showModal();
+=======
+    if (
+        appointmentCompleteButtons.length &&
+        appointmentCompleteModal &&
+        appointmentCompleteMessageModal &&
+        appointmentCompleteLink &&
+        appointmentCompleteCancelModal
+    ) {
+        appointmentCompleteButtons.forEach(button => {
+            button.addEventListener("click", (event) => {
+                event.stopPropagation();
+                const appointmentCard = button.closest(".appointment-card");
+
+                if (!appointmentCard) {
+                    return;
+                }
+
+                appointmentCompleteMessageModal.textContent = `Complete appointment for ${appointmentCard.dataset.name}?`;
+                appointmentCompleteLink.href = `/admin_appointments/complete/${appointmentCard.dataset.appointmentId}`;
+                appointmentCompleteModal.showModal();
+>>>>>>> CBL_V2
             });
         });
 
         appointmentCompleteCancelModal.addEventListener("click", () => {
+<<<<<<< HEAD
             appointmentStatusCompletedModal.close();
         });
     }
@@ -254,11 +307,40 @@ document.addEventListener("DOMContentLoaded", () => {
                 appointmentStatusCancelledMessageModal.textContent = `Cancel appointment for ${card.dataset.name}?`;
                 appointmentCancelLink.href = `/admin_appointments/cancel/${appointmentId}`;
                 appointmentStatusCancelledModal.showModal();
+=======
+            appointmentCompleteModal.close();
+        });
+    }
+
+    if (
+        appointmentCancelButtons.length &&
+        appointmentCancelModal &&
+        appointmentCancelMessageModal &&
+        appointmentCancelLink &&
+        appointmentCancelCancelModal
+    ) {
+        appointmentCancelButtons.forEach(button => {
+            button.addEventListener("click", (event) => {
+                event.stopPropagation();
+                const appointmentCard = button.closest(".appointment-card");
+
+                if (!appointmentCard) {
+                    return;
+                }
+
+                appointmentCancelMessageModal.textContent = `Cancel appointment for ${appointmentCard.dataset.name}?`;
+                appointmentCancelLink.href = `/admin_appointments/cancel/${appointmentCard.dataset.appointmentId}`;
+                appointmentCancelModal.showModal();
+>>>>>>> CBL_V2
             });
         });
 
         appointmentCancelCancelModal.addEventListener("click", () => {
+<<<<<<< HEAD
             appointmentStatusCancelledModal.close();
+=======
+            appointmentCancelModal.close();
+>>>>>>> CBL_V2
         });
     }
 });
