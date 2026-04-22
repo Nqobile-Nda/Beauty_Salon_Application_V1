@@ -1,9 +1,10 @@
 from flask import Flask, render_template, url_for, request, redirect, flash, get_flashed_messages, session
-from data_manager import load_catalog, add_item, generate_item_id, update_item, delete_item, filtered_catalog, add_user_booking_requests, load_user_booking_requests, generate_booking_request_id, load_appointments, create_appointment, generate_appointment_id, decline_appointment_status, cancel_appointment_status, accept_appointment_status, complete_appointment_status
+from data_manager import load_catalog, add_item, generate_item_id, update_item, delete_item, filtered_catalog, load_appointments, create_appointment, generate_appointment_id, cancel_appointment_status, complete_appointment_status
 import time
 import os
 from dotenv import load_dotenv
 from werkzeug.security import check_password_hash
+from models.bookings import booking_requests_table, insert_booking_request, load_user_booking_requests, load_specific_user_booking_request, update_user_booking_request_status
 
 
 load_dotenv()
@@ -22,6 +23,8 @@ admin_password_hash = os.environ.get("ADMIN_PASSWORD_HASH")
 
 if not admin_username or not admin_password_hash:
     raise RuntimeError("ADMIN_USERNAME and ADMIN_PASSWORD_HASH must be set")
+
+booking_requests_table()
 
 @app.route("/admin_login", methods=["GET", "POST"])
 def admin_login_route():
@@ -148,7 +151,7 @@ def admin_appointments_route():
     return redirect(url_for('admin_login_route', next='admin_appointments_route'))
 
 
-@app.route("/create_appointment", methods=["GET","POST"])
+@app.route("/admin_create_appointment", methods=["GET","POST"])
 def admin_create_appointment_route():
     if "user" not in session:
         return redirect(url_for('admin_login_route', next='admin_create_appointment_route'))
@@ -188,7 +191,10 @@ def admin_cancel_appointment_route(appointment_id):
     if "user" not in session:
         return redirect(url_for('admin_login_route', next='admin_cancel_appointment_route', appointment_id=appointment_id))
 
+    appointment = next((item for item in load_appointments() if item.get("appointment_id") == appointment_id), None)
     if cancel_appointment_status(appointment_id):
+        if appointment and appointment.get("request_id") is not None:
+            update_user_booking_request_status(appointment["request_id"], "Cancelled")
         flash("Appointment cancelled.", "success")
     else:
         flash("Appointment not found.", "error")
@@ -200,7 +206,10 @@ def admin_complete_appointment_route(appointment_id):
     if "user" not in session:
         return redirect(url_for('admin_login_route', next='admin_complete_appointment_route', appointment_id=appointment_id))
 
+    appointment = next((item for item in load_appointments() if item.get("appointment_id") == appointment_id), None)
     if complete_appointment_status(appointment_id):
+        if appointment and appointment.get("request_id") is not None:
+            update_user_booking_request_status(appointment["request_id"], "Completed")
         flash("Appointment completed.", "success")
     else:
         flash("Appointment not found.", "error")
@@ -229,8 +238,7 @@ def admin_booking_requests_history_route():
 def admin_booking_request_accept_route(request_id):
     if "user" not in session:
         return redirect(url_for('admin_login_route', next='admin_booking_request_accept_route', request_id=request_id))
-    user_booking_requests = load_user_booking_requests()
-    booking_request = next((item for item in user_booking_requests if item.get("request_id") == request_id), None)
+    booking_request = load_specific_user_booking_request(request_id)
     if booking_request is None:
         flash("Booking request not found.", "error")
         return redirect(url_for("admin_booking_requests_route"))
@@ -249,7 +257,7 @@ def admin_booking_request_accept_route(request_id):
             "created_by": booking_request["created_by"]
         }
     create_appointment(appointment_details)
-    accept_appointment_status(request_id)
+    update_user_booking_request_status(request_id, "Confirmed")
     flash("Booking request accepted.", "success")
     return redirect(url_for("admin_appointments_route"))
 
@@ -259,7 +267,10 @@ def admin_booking_requests_decline_route(request_id):
     if "user" not in session:
         return redirect(url_for('admin_login_route', next='admin_booking_requests_decline_route', request_id=request_id))
     
-    decline_appointment_status(request_id)
+    if update_user_booking_request_status(request_id, "Declined"):
+        flash("Booking request declined.", "success")
+    else:
+        flash("Booking request not found.", "error")
     return redirect(url_for('admin_booking_requests_route'))
 
 
@@ -310,27 +321,12 @@ def user_booking_requests_route():
         full_name = request.form.get("full_name")
         email = request.form.get("email")
         phone = request.form.get("phone")
-        preffered_date = request.form.get("date")
-        preffered_time = request.form.get("time")
+        preferred_date = request.form.get("date")
+        preferred_time = request.form.get("time")
         message = request.form.get("message")
 
-        request_id, _ = generate_booking_request_id()
+        insert_booking_request("Pending", selected_service, full_name, email, phone, preferred_date, preferred_time, message, time.strftime("%Y-%m-%d %H:%M:%S"), "user")
 
-        new_request = {
-            "request_id": request_id,
-            "status": "pending",
-            "selected_service": selected_service,
-            "full_name": full_name,
-            "email": email,
-            "phone": phone,
-            "date": preffered_date,
-            "time": preffered_time,
-            "message": message,
-            "created_at": time.strftime("%Y-%m-%d %H:%M:%S"),
-            "created_by": "user"
-        }
-
-        add_user_booking_requests(new_request)
         return redirect(url_for("user_booking_requests_route"))
     return render_template("user/booking.html", selected_service=selected_service)
 
@@ -342,4 +338,4 @@ def user_about_route():
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+    app.run(host="0.0.0.0", port=port, debug=True)
