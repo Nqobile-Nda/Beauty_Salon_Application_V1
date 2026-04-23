@@ -4,6 +4,7 @@ def database_connection():
     conn = sqlite3.connect("CBL.db")
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()
+    conn.execute("PRAGMA foreign_keys = ON")
     return conn, cur
 
 
@@ -36,20 +37,43 @@ def load_catalog():
     return catalog
 
 
-def add_item(name, price, category, image, description, created_at, created_by):
+def load_filtered_catalog(category):
     catalog_table()
     conn, cur = database_connection()
     cur.execute("""
-    INSERT INTO catalog (name, price, category, image, description, created_at, created_by) VALUES (?,?,?,?,?,?,?)
-    """, (name, price, category, image, description, created_at, created_by))
+    SELECT * FROM catalog WHERE category = ?  
+    """, (category,))
+    filtered_catalog = [dict(row) for row in cur.fetchall()]
+    conn.commit()
+    conn.close()
+    return filtered_catalog
+
+
+def add_item(name, price, category, image, description, created_at, updated_at):
+    catalog_table()
+    conn, cur = database_connection()
+    cur.execute("""
+    INSERT INTO catalog (name, price, category, image, description, created_at, updated_at) VALUES (?,?,?,?,?,?,?)
+    """, (name, price, category, image, description, created_at, updated_at))
     conn.commit()
     conn.close()
 
 
-def update_item_details(item_id, name, price, category, image, description, created_at, created_by):
+def update_item_details(item_id, name, price, category, image, description, created_at, updated_at):
     catalog_table()
-    catalog = load_catalog()
-    item = [item for item in catalog if item.get("item_id") == item_id]
-    item["name"] = name
-    item["price"] = price
-    item["category"] = category
+    conn, cur = database_connection()
+    cur.execute("""
+    UPDATE catalog SET name=?, price=?, category=?, image=?, description=?, created_at=?, updated_at=? WHERE item_id=?
+    """, (name, price, category, image, description, created_at, updated_at, item_id))
+    conn.commit()
+    conn.close()
+
+
+def delete_item(item_id):
+    catalog_table()
+    conn, cur = database_connection()
+    cur.execute("""
+    DELETE FROM catalog WHERE item_id=?
+    """, (item_id,))
+    conn.commit()
+    conn.close()

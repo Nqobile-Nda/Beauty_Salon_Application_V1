@@ -4,6 +4,7 @@ def database_connection():
     conn = sqlite3.connect("CBL.db")
     conn.row_factory = sqlite3.Row
     cur = conn.cursor()
+    conn.execute("PRAGMA foreign_keys = ON")
     return conn, cur
 
 
@@ -28,7 +29,7 @@ def booking_requests_table():
     conn.close()
 
 
-def insert_booking_request(status, selected_service, full_name, email, phone, date, time, message, created_at, created_by):
+def create_booking_request(status, selected_service, full_name, email, phone, date, time, message, created_at, created_by):
     booking_requests_table()
     conn, cur = database_connection()
     cur.execute("""
