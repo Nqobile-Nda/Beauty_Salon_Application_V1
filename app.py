@@ -1,9 +1,11 @@
 from flask import Flask, render_template, url_for, request, redirect, flash, get_flashed_messages, session
-from data_manager import load_catalog, add_item, generate_item_id, update_item, delete_item, filtered_catalog, add_user_booking_requests, load_user_booking_requests, generate_booking_request_id, load_appointments, create_appointment, generate_appointment_id, decline_appointment_status, cancel_appointment_status, accept_appointment_status, complete_appointment_status
 import time
 import os
 from dotenv import load_dotenv
 from werkzeug.security import check_password_hash
+from models.catalog import load_catalog, add_item, load_filtered_catalog, update_item_details, delete_item
+from models.bookings import booking_requests_table, create_booking_request, load_user_booking_requests, load_specific_user_booking_request, update_user_booking_request_status
+from models.appointments import appointments_table, load_appointments, create_appointment, cancelled_appointment, completed_appointment
 
 
 load_dotenv()
@@ -22,6 +24,9 @@ admin_password_hash = os.environ.get("ADMIN_PASSWORD_HASH")
 
 if not admin_username or not admin_password_hash:
     raise RuntimeError("ADMIN_USERNAME and ADMIN_PASSWORD_HASH must be set")
+
+booking_requests_table()
+appointments_table()
 
 @app.route("/admin_login", methods=["GET", "POST"])
 def admin_login_route():
@@ -62,36 +67,25 @@ def admin_add_route():
     if "user" not in session:
         return redirect(url_for('admin_login_route', next='admin_add_route')) 
 
-    item_id, _ = generate_item_id()
-
     if request.method == "POST":
         item_name = request.form.get("item_name")
         item_price = request.form.get("item_price")
         item_category = request.form.get("item_category")
         item_image = request.files['item_image']
         item_description = request.form.get("item_description")
+        item_created_at = time.strftime("%Y-%m-%d %H:%M:%S")
+        item_updated_at = "Not updated yet"
 
-        filename = None
+        if not item_image or item_image.filename == '':
+            flash("Please upload an image for the catalog item.", "error")
+            return render_template("admin/add.html")
 
-        if item_image and item_image.filename != '':
-            filename = item_image.filename
-            image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            item_image.save(image_path)
+        filename = item_image.filename
+        image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        item_image.save(image_path)
+        image_path = f"images/{filename}"
 
-        image_path = f"images/{filename}" if filename else None
-
-        new_item = {
-            "item_id": item_id,
-            "name": item_name,
-            "price": item_price,
-            "category": item_category,
-            "image": image_path,
-            "description": item_description,
-            "created_at": time.strftime("%Y-%m-%d %H:%M:%S"),
-            "updated_at": "Hasn't been updated"
-        }
-
-        add_item(new_item)
+        add_item(item_name, item_price, item_category, image_path, item_description, item_created_at, item_updated_at)
         print("Saved")
         return redirect(url_for("admin_catalog_route"))
     return render_template("admin/add.html")
@@ -122,9 +116,9 @@ def edit_item_route(item_id):
                 image_path = f"images/{filename}"
 
             else:
-                image_path = item.get('image')
+                image_path = item.get("image")
 
-            update_item(item_id, item_name, item_price, item_category, image_path, item_description, created_at, updated_at)
+            update_item_details(item_id, item_name, item_price, item_category, image_path, item_description, created_at, updated_at)
             print("Item updated")
             return redirect(url_for("admin_catalog_route"))
         return render_template("admin/edit_catalog.html", item=item)
@@ -148,13 +142,12 @@ def admin_appointments_route():
     return redirect(url_for('admin_login_route', next='admin_appointments_route'))
 
 
-@app.route("/create_appointment", methods=["GET","POST"])
+@app.route("/admin_create_appointment", methods=["GET","POST"])
 def admin_create_appointment_route():
     if "user" not in session:
         return redirect(url_for('admin_login_route', next='admin_create_appointment_route'))
 
     if request.method == "POST":
-        appointment_id, _ = generate_appointment_id()
         selected_service = request.form.get("selected-service")
         full_name = request.form.get("full_name")
         email = request.form.get("email")
@@ -165,20 +158,18 @@ def admin_create_appointment_route():
         created_at = time.strftime("%Y-%m-%d %H:%M:%S")
         created_by = "admin"
 
-        admin_created_appointment = {
-            "appointment_id": appointment_id,
-            "selected_service": selected_service,
-            "full_name": full_name,
-            "email": email,
-            "phone": phone,
-            "date": preffered_date,
-            "time": preffered_time,
-            "message": message,
-            "created_at": created_at,
-            "created_by": created_by
-        }
-
-        create_appointment(admin_created_appointment)
+        create_appointment(
+            None,
+            selected_service,
+            full_name,
+            email,
+            phone,
+            preffered_date,
+            preffered_time,
+            message,
+            created_at,
+            created_by,
+        )
         return redirect(url_for("admin_appointments_route"))
     return render_template("admin/create_appointment.html")   
 
@@ -188,10 +179,13 @@ def admin_cancel_appointment_route(appointment_id):
     if "user" not in session:
         return redirect(url_for('admin_login_route', next='admin_cancel_appointment_route', appointment_id=appointment_id))
 
-    if cancel_appointment_status(appointment_id):
-        flash("Appointment cancelled.", "success")
-    else:
+    appointment = next((item for item in load_appointments() if item.get("appointment_id") == appointment_id), None)
+    if appointment is None:
         flash("Appointment not found.", "error")
+        return redirect(url_for('admin_appointments_route'))
+
+    cancelled_appointment(appointment_id, appointment.get("request_id"))
+    flash("Appointment cancelled.", "success")
     return redirect(url_for('admin_appointments_route'))
 
 
@@ -200,10 +194,13 @@ def admin_complete_appointment_route(appointment_id):
     if "user" not in session:
         return redirect(url_for('admin_login_route', next='admin_complete_appointment_route', appointment_id=appointment_id))
 
-    if complete_appointment_status(appointment_id):
-        flash("Appointment completed.", "success")
-    else:
+    appointment = next((item for item in load_appointments() if item.get("appointment_id") == appointment_id), None)
+    if appointment is None:
         flash("Appointment not found.", "error")
+        return redirect(url_for('admin_appointments_route'))
+
+    completed_appointment(appointment_id, appointment.get("request_id"))
+    flash("Appointment completed.", "success")
     return redirect(url_for('admin_appointments_route'))
 
 
@@ -229,27 +226,23 @@ def admin_booking_requests_history_route():
 def admin_booking_request_accept_route(request_id):
     if "user" not in session:
         return redirect(url_for('admin_login_route', next='admin_booking_request_accept_route', request_id=request_id))
-    user_booking_requests = load_user_booking_requests()
-    booking_request = next((item for item in user_booking_requests if item.get("request_id") == request_id), None)
+    booking_request = load_specific_user_booking_request(request_id)
     if booking_request is None:
         flash("Booking request not found.", "error")
         return redirect(url_for("admin_booking_requests_route"))
-    appointment_id, _ = generate_appointment_id()
-    appointment_details = {
-            "appointment_id": appointment_id,
-            "request_id": booking_request["request_id"],
-            "selected_service": booking_request["selected_service"],
-            "full_name": booking_request["full_name"],
-            "email": booking_request["email"],
-            "phone": booking_request["phone"],
-            "date": booking_request["date"],
-            "time": booking_request["time"],
-            "message": booking_request["message"],
-            "created_at": time.strftime("%Y-%m-%d %H:%M:%S"),
-            "created_by": booking_request["created_by"]
-        }
-    create_appointment(appointment_details)
-    accept_appointment_status(request_id)
+
+    create_appointment(
+        booking_request["request_id"],
+        booking_request["selected_service"],
+        booking_request["full_name"],
+        booking_request["email"],
+        booking_request["phone"],
+        booking_request["date"],
+        booking_request["time"],
+        booking_request["message"],
+        time.strftime("%Y-%m-%d %H:%M:%S"),
+        booking_request["created_by"],
+    )
     flash("Booking request accepted.", "success")
     return redirect(url_for("admin_appointments_route"))
 
@@ -259,7 +252,10 @@ def admin_booking_requests_decline_route(request_id):
     if "user" not in session:
         return redirect(url_for('admin_login_route', next='admin_booking_requests_decline_route', request_id=request_id))
     
-    decline_appointment_status(request_id)
+    if update_user_booking_request_status(request_id, "Declined"):
+        flash("Booking request declined.", "success")
+    else:
+        flash("Booking request not found.", "error")
     return redirect(url_for('admin_booking_requests_route'))
 
 
@@ -296,9 +292,9 @@ def user_catalog_route():
 
 @app.route("/user_catalog/<string:category>")
 def filtered_catalog_route(category):
-    items = filtered_catalog(category)
+    filtered_catalog = load_filtered_catalog(category)
     name = category
-    return render_template("user/filtered_catalog.html", items=items, name=name)
+    return render_template("user/filtered_catalog.html", items=filtered_catalog, name=name)
 
 
 @app.route("/user_booking_requests", methods=["GET", "POST"])
@@ -310,27 +306,12 @@ def user_booking_requests_route():
         full_name = request.form.get("full_name")
         email = request.form.get("email")
         phone = request.form.get("phone")
-        preffered_date = request.form.get("date")
-        preffered_time = request.form.get("time")
+        preferred_date = request.form.get("date")
+        preferred_time = request.form.get("time")
         message = request.form.get("message")
 
-        request_id, _ = generate_booking_request_id()
+        create_booking_request("Pending", selected_service, full_name, email, phone, preferred_date, preferred_time, message, time.strftime("%Y-%m-%d %H:%M:%S"), "user")
 
-        new_request = {
-            "request_id": request_id,
-            "status": "pending",
-            "selected_service": selected_service,
-            "full_name": full_name,
-            "email": email,
-            "phone": phone,
-            "date": preffered_date,
-            "time": preffered_time,
-            "message": message,
-            "created_at": time.strftime("%Y-%m-%d %H:%M:%S"),
-            "created_by": "user"
-        }
-
-        add_user_booking_requests(new_request)
         return redirect(url_for("user_booking_requests_route"))
     return render_template("user/booking.html", selected_service=selected_service)
 
@@ -342,4 +323,4 @@ def user_about_route():
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+    app.run(host="0.0.0.0", port=port, debug=True)

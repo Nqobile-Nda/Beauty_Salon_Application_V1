@@ -1,5 +1,5 @@
 {
-    "next_id": 28,
+    "next_id": 30,
     "appointments": [
         {
             "request_id": 1,
@@ -58,20 +58,6 @@
         },
         {
             "appointment_id": 18,
-            "request_id": 4,
-            "selected_service": "Hairstyles",
-            "full_name": "Nomsa Zulu",
-            "email": "nomsa.z@example.com",
-            "phone": "0745678901",
-            "date": "2026-04-18",
-            "time": "12:00",
-            "message": "Need cornrows for the weekend.",
-            "created_at": "2026-04-13 08:45:00",
-            "created_by": "user",
-            "status": "confirmed"
-        },
-        {
-            "appointment_id": 19,
             "request_id": 4,
             "selected_service": "Hairstyles",
             "full_name": "Nomsa Zulu",
@@ -147,7 +133,33 @@
             "time": "20:12",
             "message": "Hello World",
             "created_at": "2026-04-14 20:12:03",
+            "created_by": "admin",
+            "status": "confirmed"
+        },
+        {
+            "selected_service": "Wigs",
+            "full_name": "Nkosana Ndabezitha",
+            "email": "asdfghj@email",
+            "phone": "060 560 2506",
+            "date": "2026-04-20",
+            "time": "15:46",
+            "message": "Hello World",
+            "created_at": "2026-04-20 15:41:27",
             "created_by": "admin"
+        },
+        {
+            "appointment_id": 29,
+            "request_id": 1,
+            "selected_service": "Wigs",
+            "full_name": "Nkosana Ndabezitha",
+            "email": "ndabezithanqobile27@gmail.com",
+            "phone": "060 560 2506",
+            "date": "2026-04-24",
+            "time": "22:30",
+            "message": "Hello World",
+            "created_at": "2026-04-21 22:27:25",
+            "created_by": "user",
+            "status": "confirmed"
         }
     ]
 }
