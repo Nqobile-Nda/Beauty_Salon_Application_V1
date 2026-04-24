@@ -4,7 +4,7 @@ Carol's Beauty Lounge is a Flask web application for managing a small beauty ser
 
 ## Overview
 
-This project was built as a practical salon management application and learning project. It currently uses Flask, Jinja templates, JavaScript, and JSON file storage, with future plans to move to SQLite as the project grows.
+This project was built as a practical salon management application and learning project. It currently uses Flask, Jinja templates, JavaScript, and SQLite for persistent storage.
 
 ## Features
 
@@ -45,7 +45,7 @@ The user side allows customers to:
 - CSS
 - JavaScript
 - `python-dotenv`
-- JSON for current data storage
+- SQLite
 
 ## Project Structure
 
@@ -56,9 +56,11 @@ CBL/
 |-- requirements.txt
 |-- .gitignore
 |-- .env
-|-- catalog.json
-|-- booking_requests.json
-|-- appointments.json
+|-- CBL.db
+|-- models/
+|   |-- catalog.py
+|   |-- bookings.py
+|   `-- appointments.py
 |-- static/
 |   |-- style.css
 |   |-- script.js
@@ -70,13 +72,16 @@ CBL/
 
 ## Data Storage
 
-The app currently stores data in:
+The app currently stores data in SQLite:
 
-- `catalog.json`
-- `booking_requests.json`
-- `appointments.json`
+- `CBL.db`
 
-This setup keeps the project simple for local development and learning. A database-backed version can be introduced later.
+The main tables are:
+
+- `catalog`
+- `booking_requests`
+- `appointments`
+
 
 ## Local Setup
 
@@ -91,6 +96,8 @@ pip install -r requirements.txt
 
 ```env
 SECRET_KEY="your-secret-key"
+ADMIN_USERNAME="your-admin-username"
+ADMIN_PASSWORD_HASH="your-generated-password-hash"
 ```
 
 4. Start the application:
@@ -105,25 +112,28 @@ python app.py
 http://127.0.0.1:5000
 ```
 
-## Default Admin Credentials
+To generate a password hash for `ADMIN_PASSWORD_HASH`:
 
-Current admin login details:
+```powershell
+python -c "from werkzeug.security import generate_password_hash; print(generate_password_hash('your-password'))"
+```
 
-- Username: `user`
-- Password: `password`
+## Admin Credentials
 
-These credentials are hardcoded for development and should be replaced before production use.
+Admin login credentials are loaded from environment variables:
+
+- `ADMIN_USERNAME`
+- `ADMIN_PASSWORD_HASH`
+
+The application raises an error on startup if these values are missing.
 
 ## Current Limitations
 
-- JSON storage is not ideal for multi-user or production usage
-- Admin credentials are still hardcoded
 - File upload sanitization still needs improvement
 - Some flows are still being refined for deployment readiness
 
 ## Roadmap
 
-- Move persistence from JSON files to SQLite
 - Improve validation and error handling
 - Add safer authentication and credential management
 - Improve deployment readiness
