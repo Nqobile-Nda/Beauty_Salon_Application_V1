@@ -5,10 +5,10 @@
 <form method="POST">
     <label>Chosen Service:</label>
     <select name="selected-service" id="selected-service" title="selected-service" required>
-        <option value="" disabled {% if not selected_service %}selected{% endif %}>Choose a service:</option>
-        <option {% if selected_service == "Hairstyles" %}selected{% endif %}>Hairstyles</option>
-        <option {% if selected_service == "Wigs" %}selected{% endif %}>Wigs</option>
-        <option {% if selected_service == "Nails" %}selected{% endif %}>Nails</option>
+        <option value="" disabled>Choose a service:</option>
+        <option>Hairstyles</option>
+        <option>Wigs</option>
+        <option>Nails</option>
     </select>
     
     <label for="name">Full Name:</label>
