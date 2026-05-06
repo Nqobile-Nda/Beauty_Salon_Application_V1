@@ -62,7 +62,6 @@ def admin_login_route():
 
 
 # Admin home route - displays main admin dashboard
-@app.route("/")
 @app.route("/admin_home")
 def admin_home_route():
     # Verify admin is logged in
@@ -331,6 +330,7 @@ def exit_admin_route():
 # ========== USER ROUTES ==========
 
 # User home route - displays main user page
+@app.route("/")
 @app.route("/user_home")
 def user_home_route():
     return render_template("user/home.html")
