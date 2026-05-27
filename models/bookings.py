@@ -1,12 +1,4 @@
-import sqlite3
-
-
-def database_connection():
-    conn = sqlite3.connect("CBL.db")
-    conn.row_factory = sqlite3.Row
-    conn.execute("PRAGMA foreign_keys = ON")
-    cur = conn.cursor()
-    return conn, cur
+from models.db import database_connection, immediate_transaction
 
 
 def booking_requests_table():
@@ -30,16 +22,73 @@ def booking_requests_table():
     conn.close()
 
 
+def booking_slot_has_conflict(date, time):
+    conn, cur = database_connection()
+    cur.execute(
+        """
+        SELECT request_id
+        FROM booking_requests
+        WHERE date = ?
+          AND time = ?
+          AND status IN ('Pending', 'Confirmed')
+        LIMIT 1
+        """,
+        (date, time),
+    )
+    booking_conflict = cur.fetchone()
+
+    cur.execute(
+        """
+        SELECT appointment_id
+        FROM appointments
+        WHERE date = ?
+          AND time = ?
+        LIMIT 1
+        """,
+        (date, time),
+    )
+    appointment_conflict = cur.fetchone()
+    conn.close()
+    return booking_conflict is not None or appointment_conflict is not None
+
+
 def create_booking_request(status, selected_service, full_name, email, phone, date, time, message, created_at, created_by):
     booking_requests_table()
-    conn, cur = database_connection()
-    cur.execute("""
-    INSERT INTO booking_requests (
-        status, selected_service, full_name, email, phone, date, time, message, created_at, created_by
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    """, (status, selected_service, full_name, email, phone, date, time, message, created_at, created_by))
-    conn.commit()
-    conn.close()
+    with immediate_transaction() as (conn, cur):
+        cur.execute(
+            """
+            SELECT request_id
+            FROM booking_requests
+            WHERE date = ?
+              AND time = ?
+              AND status IN ('Pending', 'Confirmed')
+            LIMIT 1
+            """,
+            (date, time),
+        )
+        booking_conflict = cur.fetchone()
+
+        cur.execute(
+            """
+            SELECT appointment_id
+            FROM appointments
+            WHERE date = ?
+              AND time = ?
+            LIMIT 1
+            """,
+            (date, time),
+        )
+        appointment_conflict = cur.fetchone()
+
+        if booking_conflict or appointment_conflict:
+            return False
+
+        cur.execute("""
+        INSERT INTO booking_requests (
+            status, selected_service, full_name, email, phone, date, time, message, created_at, created_by
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (status, selected_service, full_name, email, phone, date, time, message, created_at, created_by))
+        return True
 
 
 def load_user_booking_requests():
