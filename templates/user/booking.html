@@ -2,13 +2,13 @@
 
 {% block content %}
 <h1>Booking Request</h1>
-<form method="POST">
-    <label>Chosen Service:</label>
+<form method="POST" id="booking-request-form">
+    <label for="selected-service">Chosen Service:</label>
     <select name="selected-service" id="selected-service" title="selected-service" required>
-        <option value="" disabled>Choose a service:</option>
-        <option>Hairstyles</option>
-        <option>Wigs</option>
-        <option>Nails</option>
+        <option value="" disabled {% if not selected_service %}selected{% endif %}>Choose a service:</option>
+        <option {% if selected_service == "Hairstyles" %}selected{% endif %}>Hairstyles</option>
+        <option {% if selected_service == "Wigs" %}selected{% endif %}>Wigs</option>
+        <option {% if selected_service == "Nails" %}selected{% endif %}>Nails</option>
     </select>
     
     <label for="name">Full Name:</label>
@@ -25,10 +25,11 @@
 
     <label for="time">Time:</label>
     <input type="time" id="time" name="time" required>
+    <p id="availability-status" class="availability-status" aria-live="polite"></p>
 
-    <label>Message:</label>
+    <label for="message">Message:</label>
     <textarea type="text" name="message" id="message" title="message">Hello World</textarea>
 
-    <button type="submit">Book Now</button>
+    <button type="submit" id="booking-submit">Book Now</button>
 </form>
 {% endblock %}
