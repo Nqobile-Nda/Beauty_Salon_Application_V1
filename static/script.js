@@ -16,6 +16,57 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 3000);
     }
 
+    const bookingForm = document.getElementById("booking-request-form");
+    const bookingDate = document.getElementById("date");
+    const bookingTime = document.getElementById("time");
+    const bookingSubmit = document.getElementById("booking-submit");
+    const availabilityStatus = document.getElementById("availability-status");
+
+    if (bookingForm && bookingDate && bookingTime && bookingSubmit && availabilityStatus) {
+        const setAvailabilityStatus = (message, state) => {
+            availabilityStatus.textContent = message;
+            availabilityStatus.dataset.state = state;
+            bookingSubmit.disabled = state === "unavailable" || state === "checking";
+        };
+
+        const checkAvailability = async () => {
+            if (!bookingDate.value || !bookingTime.value) {
+                setAvailabilityStatus("", "idle");
+                bookingSubmit.disabled = false;
+                return;
+            }
+
+            setAvailabilityStatus("Checking availability...", "checking");
+
+            try {
+                const params = new URLSearchParams({
+                    date: bookingDate.value,
+                    time: bookingTime.value,
+                });
+                const response = await fetch(`/api/availability?${params}`, {
+                    headers: { "Accept": "application/json" },
+                });
+
+                if (!response.ok) {
+                    throw new Error("Availability request failed");
+                }
+
+                const result = await response.json();
+                if (result.available) {
+                    setAvailabilityStatus("This time is available.", "available");
+                } else {
+                    setAvailabilityStatus("That time is already booked. Please choose another time.", "unavailable");
+                }
+            } catch (error) {
+                setAvailabilityStatus("Availability could not be checked. You can still submit and we will verify it.", "unknown");
+                bookingSubmit.disabled = false;
+            }
+        };
+
+        bookingDate.addEventListener("change", checkAvailability);
+        bookingTime.addEventListener("change", checkAvailability);
+    }
+
 
     const itemCard = document.querySelectorAll(".admin-item-card");
     const itemCardModal = document.getElementById("admin-item-card-modal");
