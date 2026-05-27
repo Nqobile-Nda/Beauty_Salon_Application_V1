@@ -1,12 +1,4 @@
-import sqlite3
-
-
-def database_connection():
-    conn = sqlite3.connect("CBL.db")
-    conn.row_factory = sqlite3.Row
-    conn.execute("PRAGMA foreign_keys = ON")
-    cur = conn.cursor()
-    return conn, cur
+from models.db import database_connection, immediate_transaction
 
 
 def appointments_table():
@@ -50,21 +42,47 @@ def load_appointments():
 
 def create_appointment(request_id, selected_service, full_name, email, phone, date, time, message, created_at, created_by):
     appointments_table()
-    conn, cur = database_connection()
+    with immediate_transaction() as (conn, cur):
+        cur.execute(
+            """
+            SELECT request_id
+            FROM booking_requests
+            WHERE date = ?
+              AND time = ?
+              AND status IN ('Pending', 'Confirmed')
+              AND (? IS NULL OR request_id != ?)
+            LIMIT 1
+            """,
+            (date, time, request_id, request_id),
+        )
+        if cur.fetchone():
+            return False
 
-    cur.execute("""
-    INSERT INTO appointments (
-    request_id, selected_service, full_name, email, phone, date, time, message, created_at, created_by
-    ) VALUES (?,?,?,?,?,?,?,?,?,?)
-    """, (request_id, selected_service, full_name, email, phone, date, time, message, created_at, created_by))
+        cur.execute(
+            """
+            SELECT appointment_id
+            FROM appointments
+            WHERE date = ?
+              AND time = ?
+            LIMIT 1
+            """,
+            (date, time),
+        )
+        if cur.fetchone():
+            return False
 
-    if request_id is not None:
         cur.execute("""
-        UPDATE booking_requests SET status = ? WHERE request_id = ?
-        """, ("Confirmed", request_id))
+        INSERT INTO appointments (
+        request_id, selected_service, full_name, email, phone, date, time, message, created_at, created_by
+        ) VALUES (?,?,?,?,?,?,?,?,?,?)
+        """, (request_id, selected_service, full_name, email, phone, date, time, message, created_at, created_by))
 
-    conn.commit()
-    conn.close()
+        if request_id is not None:
+            cur.execute("""
+            UPDATE booking_requests SET status = ? WHERE request_id = ?
+            """, ("Confirmed", request_id))
+
+        return True
 
 
 def load_specific_appointment(appointment_id):
