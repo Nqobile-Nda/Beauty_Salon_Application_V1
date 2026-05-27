@@ -310,6 +310,35 @@ form button {
 }
 
 
+.availability-status {
+    min-height: 1.5rem;
+    margin: -4px 0 12px;
+    font-size: 0.95rem;
+}
+
+
+.availability-status[data-state="available"] {
+    color: #116b32;
+}
+
+
+.availability-status[data-state="unavailable"] {
+    color: #9f1d1d;
+}
+
+
+.availability-status[data-state="checking"],
+.availability-status[data-state="unknown"] {
+    color: var(--ink-700);
+}
+
+
+button:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+}
+
+
 dialog {
     border: none;
     border-radius: 6px;
