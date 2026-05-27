@@ -1,15 +1,12 @@
-# Flask Booking Management System
-# This application manages a service booking system with admin and user interfaces
-# Supports catalog management, booking requests, and appointment scheduling
-
-from flask import Flask, render_template, url_for, request, redirect, flash, get_flashed_messages, session
+from flask import Flask, render_template, url_for, request, redirect, flash, get_flashed_messages, session, jsonify
 import time
 import os
 from dotenv import load_dotenv
 from werkzeug.security import check_password_hash
-from models.catalog import load_catalog, add_item, load_filtered_catalog, update_item_details, delete_item
-from models.bookings import booking_requests_table, create_booking_request, load_user_booking_requests, load_specific_user_booking_request, update_user_booking_request_status
+from models.catalog import load_catalog, add_item, load_filtered_catalog, update_item_details, delete_item, catalog_table
+from models.bookings import booking_requests_table, create_booking_request, load_user_booking_requests, load_specific_user_booking_request, update_user_booking_request_status, booking_slot_has_conflict
 from models.appointments import appointments_table, load_appointments, create_appointment, cancelled_appointment, completed_appointment
+from models.db import initialize_database_performance
 
 
 # Load environment variables from .env file
@@ -21,6 +18,7 @@ app = Flask(__name__)
 # Configure file upload directory for catalog item images
 UPLOAD_FOLDER = "static/images"
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+
 app.secret_key = os.environ.get("SECRET_KEY")
 
 # Ensure SECRET_KEY is configured for session management
@@ -36,8 +34,10 @@ if not admin_username or not admin_password_hash:
     raise RuntimeError("ADMIN_USERNAME and ADMIN_PASSWORD_HASH must be set")
 
 # Initialize database tables for bookings and appointments
+catalog_table()
 booking_requests_table()
 appointments_table()
+initialize_database_performance()
 
 # ========== ADMIN ROUTES ==========
 
@@ -192,7 +192,7 @@ def admin_create_appointment_route():
         created_by = "admin"
 
         # Create appointment in database
-        create_appointment(
+        created = create_appointment(
             None,
             selected_service,
             full_name,
@@ -204,6 +204,9 @@ def admin_create_appointment_route():
             created_at,
             created_by,
         )
+        if not created:
+            flash("That appointment slot is already booked. Please choose another date or time.", "error")
+            return render_template("admin/create_appointment.html")
         return redirect(url_for("admin_appointments_route"))
     return render_template("admin/create_appointment.html")   
 
@@ -276,8 +279,12 @@ def admin_booking_request_accept_route(request_id):
         flash("Booking request not found.", "error")
         return redirect(url_for("admin_booking_requests_route"))
 
+    if booking_request["status"] != "Pending":
+        flash("Only pending booking requests can be accepted.", "error")
+        return redirect(url_for("admin_booking_requests_route"))
+
     # Create appointment from booking request details
-    create_appointment(
+    created = create_appointment(
         booking_request["request_id"],
         booking_request["selected_service"],
         booking_request["full_name"],
@@ -289,6 +296,9 @@ def admin_booking_request_accept_route(request_id):
         time.strftime("%Y-%m-%d %H:%M:%S"),
         booking_request["created_by"],
     )
+    if not created:
+        flash("That booking conflicts with an existing appointment. Please choose another slot before accepting.", "error")
+        return redirect(url_for("admin_booking_requests_route"))
     flash("Booking request accepted.", "success")
     return redirect(url_for("admin_appointments_route"))
 
@@ -373,10 +383,43 @@ def user_booking_requests_route():
         message = request.form.get("message")
 
         # Create booking request in database
-        create_booking_request("Pending", selected_service, full_name, email, phone, preferred_date, preferred_time, message, time.strftime("%Y-%m-%d %H:%M:%S"), "user")
+        created = create_booking_request("Pending", selected_service, full_name, email, phone, preferred_date, preferred_time, message, time.strftime("%Y-%m-%d %H:%M:%S"), "user")
+        if not created:
+            flash("That time is no longer available. Please choose another slot.", "error")
+            return render_template("user/booking.html", selected_service=selected_service)
 
+        flash("Booking request received. We will confirm your appointment soon.", "success")
         return redirect(url_for("user_booking_requests_route"))
     return render_template("user/booking.html", selected_service=selected_service)
+
+
+@app.route("/api/availability")
+def availability_route():
+    date = request.args.get("date")
+    requested_time = request.args.get("time")
+
+    if not date:
+        return jsonify({"error": "Date is required"}), 400
+
+    opening_hour = 9
+    closing_hour = 17
+    slots = []
+
+    for hour in range(opening_hour, closing_hour):
+        for minute in (0, 30):
+            slot_time = f"{hour:02d}:{minute:02d}"
+            slots.append({
+                "time": slot_time,
+                "available": not booking_slot_has_conflict(date, slot_time),
+            })
+
+    if requested_time:
+        return jsonify({
+            "time": requested_time,
+            "available": not booking_slot_has_conflict(date, requested_time),
+        })
+
+    return jsonify(slots)
 
 
 # User about route - displays user information page
