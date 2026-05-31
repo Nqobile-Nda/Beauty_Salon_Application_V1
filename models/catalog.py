@@ -15,6 +15,14 @@ def catalog_table():
     updated_at TEXT NOT NULL    
     );
     """)
+
+    cur.execute("""SELECT * FROM catalog""")
+    item = cur.fetchone()
+    if not item:
+        cur.execute("""
+        INSERT INTO catalog (name, price, category, image, description, created_at, updated_at) VALUES (?,?,?,?,?,?,?)
+        """, ("Nqobile", "200", "Wigs", "Non", "Hi", "2006-12-12 08:12:12", "2006-12-12 08:12:12"))
+
     conn.commit()
     conn.close()
 
