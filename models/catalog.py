@@ -9,7 +9,7 @@ def catalog_table():
     name TEXT NOT NULL,
     price TEXT NOT NULL,
     category TEXT NOT NULL,
-    image BLOB NOT NULL,
+    image TEXT NOT NULL,
     description TEXT NOT NULL,
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL    
@@ -21,7 +21,7 @@ def catalog_table():
     if not item:
         cur.execute("""
         INSERT INTO catalog (name, price, category, image, description, created_at, updated_at) VALUES (?,?,?,?,?,?,?)
-        """, ("Nqobile", "200", "Wigs", "Non", "Hi", "2006-12-12 08:12:12", "2006-12-12 08:12:12"))
+        """, ("Nqobile", "200", "Wigs", "images/ImageError.webp", "Hi", "2006-12-12 08:12:12", "2006-12-12 08:12:12"))
 
     conn.commit()
     conn.close()
