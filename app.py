@@ -3,6 +3,7 @@ import time
 import os
 from dotenv import load_dotenv
 from werkzeug.security import check_password_hash
+from werkzeug.utils import secure_filename
 from models.catalog import load_catalog, add_item, load_filtered_catalog, update_item_details, delete_item, catalog_table
 from models.bookings import booking_requests_table, create_booking_request, load_user_booking_requests, load_specific_user_booking_request, update_user_booking_request_status, booking_slot_has_conflict
 from models.appointments import appointments_table, load_appointments, create_appointment, cancelled_appointment, completed_appointment
@@ -103,7 +104,7 @@ def admin_add_route():
             return render_template("admin/add.html")
 
         # Save image to static/images directory
-        filename = item_image.filename
+        filename = secure_filename(item_image.filename)
         image_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         item_image.save(image_path)
         image_path = f"images/{filename}"
@@ -137,7 +138,7 @@ def edit_item_route(item_id):
 
             # Handle image update if new image is provided
             if item_image and item_image.filename != "":
-                filename = item_image.filename
+                filename = secure_filename(item_image.filename)
                 save_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
                 item_image.save(save_path)
                 image_path = f"images/{filename}"
