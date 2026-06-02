@@ -3,13 +3,9 @@
 {% block content %}
 <h1>Booking Request</h1>
 <form method="POST" id="booking-request-form">
-    <label for="selected-service">Chosen Service:</label>
-    <select name="selected-service" id="selected-service" title="selected-service" required>
-        <option value="" disabled {% if not selected_service %}selected{% endif %}>Choose a service:</option>
-        <option>Hairstyles</option>
-        <option>Wigs</option>
-        <option>Nails</option>
-    </select>
+    <label for="selected-service">Chosen Service(s):</label>
+    <input type="hidden" id="selected-service" name="selected-service" required>
+    <div id="selected-service-display" class="selected-services" role="button" tabindex="0">No services chosen — click to choose</div>
     
     <label for="name">Full Name:</label>
     <input type="text" id="name" name="full_name" required>
@@ -32,4 +28,10 @@
 
     <button type="submit" id="booking-submit">Book Now</button>
 </form>
+
+
+<dialog id="user-booking-services-modal">
+    <p>Services</p>
+    <button id="user-booking-services-modal-close" type="button">Close</button>
+</dialog>
 {% endblock %}
