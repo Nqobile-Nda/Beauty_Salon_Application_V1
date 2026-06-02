@@ -348,6 +348,11 @@ def user_home_route():
 
 
 # User catalog route - displays all services grouped by category
+@app.route("/api/catalog")
+def catalog_route():
+    catalog = load_catalog()
+    return jsonify(catalog)
+
 @app.route("/user_catalog")
 def user_catalog_route():
     catalog = load_catalog()
