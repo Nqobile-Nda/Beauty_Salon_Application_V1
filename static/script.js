@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
     const hamburger = document.getElementById("hamburger");
     const navLinks = document.getElementById("nav-links");
     if (hamburger && navLinks) {
@@ -14,6 +14,88 @@ document.addEventListener("DOMContentLoaded", () => {
         setTimeout(() => {
             flashContainer.style.display = "none";
         }, 3000);
+    }
+
+    async function loadCatalog() {
+        const response = await fetch("/api/catalog");
+        const catalog = await response.json();
+        return catalog
+    }
+
+    const selectedServiceInput = document.getElementById("selected-service");
+    const selectedServiceDisplay = document.getElementById("selected-service-display");
+    const userBookingServicesModal = document.getElementById("user-booking-services-modal");
+    const userBookingServicesModalClose = document.getElementById("user-booking-services-modal-close");
+
+    if (selectedServiceInput && selectedServiceDisplay) {
+
+        const catalog = await loadCatalog();
+
+        if (Array.isArray(catalog) && userBookingServicesModal) {
+            const servicesContainer = document.createElement("div");
+            servicesContainer.className = "services-grid";
+
+            const selectedIds = new Set();
+            const idToName = {};
+
+            catalog.forEach(item => {
+                const id = item.id ?? item.name;
+                idToName[id] = item.name;
+
+                const card = document.createElement("div");
+                card.className = "service-card";
+                card.dataset.value = id;
+                card.innerHTML = `<strong>${item.name}</strong>${item.price ? `<div class="price">R${item.price}</div>` : ""}`;
+                card.addEventListener("click", () => {
+                    if (selectedIds.has(id)) {
+                        selectedIds.delete(id);
+                        card.classList.remove("selected");
+                    } else {
+                        selectedIds.add(id);
+                        card.classList.add("selected");
+                    }
+                });
+                servicesContainer.appendChild(card);
+            });
+
+            const confirmBtn = document.createElement("button");
+            confirmBtn.type = "button";
+            confirmBtn.id = "user-booking-services-modal-confirm";
+            confirmBtn.textContent = "Add selected services";
+            confirmBtn.addEventListener("click", () => {
+                const idsArray = Array.from(selectedIds);
+                selectedServiceInput.value = idsArray.join(",");
+                if (idsArray.length) {
+                    selectedServiceDisplay.textContent = idsArray.map(i => idToName[i] || i).join(", ");
+                } else {
+                    selectedServiceDisplay.textContent = "No services chosen — click to choose";
+                }
+                userBookingServicesModal.close();
+            });
+
+            const existingClose = userBookingServicesModal.querySelector('#user-booking-services-modal-close');
+            userBookingServicesModal.insertBefore(servicesContainer, existingClose || null);
+            if (existingClose) userBookingServicesModal.insertBefore(confirmBtn, existingClose);
+            else userBookingServicesModal.appendChild(confirmBtn);
+
+        } else if (userBookingServicesModal) {
+            const pre = document.createElement('pre');
+            pre.textContent = JSON.stringify(catalog, null, 2);
+            const existingClose = userBookingServicesModal.querySelector('#user-booking-services-modal-close');
+            if (existingClose) userBookingServicesModal.insertBefore(pre, existingClose);
+            else userBookingServicesModal.appendChild(pre);
+        }
+
+        selectedServiceDisplay.addEventListener("click", () => {
+            if (userBookingServicesModal) userBookingServicesModal.showModal();
+        });
+
+        if (userBookingServicesModalClose) {
+            userBookingServicesModalClose.addEventListener("click", () => {
+                if (userBookingServicesModal) userBookingServicesModal.close();
+            });
+        }
+
     }
 
     const bookingForm = document.getElementById("booking-request-form");
