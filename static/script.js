@@ -22,79 +22,75 @@ document.addEventListener("DOMContentLoaded", async () => {
         return catalog
     }
 
-    const selectedServiceInput = document.getElementById("selected-service");
     const selectedServiceDisplay = document.getElementById("selected-service-display");
     const userBookingServicesModal = document.getElementById("user-booking-services-modal");
-    const userBookingServicesModalClose = document.getElementById("user-booking-services-modal-close");
 
-    if (selectedServiceInput && selectedServiceDisplay) {
+    if (selectedServiceDisplay && userBookingServicesModal) {
 
         const catalog = await loadCatalog();
+        const selectedServices = new Set(
+            selectedServiceDisplay.value
+                .split(",")
+                .map(service => service.trim())
+                .filter(Boolean)
+        );
 
-        if (Array.isArray(catalog) && userBookingServicesModal) {
-            const servicesContainer = document.createElement("div");
-            servicesContainer.className = "services-grid";
+        const updateSelectedServiceDisplay = () => {
+            selectedServiceDisplay.value = Array.from(selectedServices).join(", ");
+        };
 
-            const selectedIds = new Set();
-            const idToName = {};
+        const escapeHtml = (value) => String(value ?? "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
 
-            catalog.forEach(item => {
-                const id = item.id ?? item.name;
-                idToName[id] = item.name;
-
-                const card = document.createElement("div");
-                card.className = "service-card";
-                card.dataset.value = id;
-                card.innerHTML = `<strong>${item.name}</strong>${item.price ? `<div class="price">R${item.price}</div>` : ""}`;
-                card.addEventListener("click", () => {
-                    if (selectedIds.has(id)) {
-                        selectedIds.delete(id);
-                        card.classList.remove("selected");
-                    } else {
-                        selectedIds.add(id);
-                        card.classList.add("selected");
-                    }
-                });
-                servicesContainer.appendChild(card);
-            });
-
-            const confirmBtn = document.createElement("button");
-            confirmBtn.type = "button";
-            confirmBtn.id = "user-booking-services-modal-confirm";
-            confirmBtn.textContent = "Add selected services";
-            confirmBtn.addEventListener("click", () => {
-                const idsArray = Array.from(selectedIds);
-                selectedServiceInput.value = idsArray.join(",");
-                if (idsArray.length) {
-                    selectedServiceDisplay.textContent = idsArray.map(i => idToName[i] || i).join(", ");
-                } else {
-                    selectedServiceDisplay.textContent = "No services chosen — click to choose";
-                }
-                userBookingServicesModal.close();
-            });
-
-            const existingClose = userBookingServicesModal.querySelector('#user-booking-services-modal-close');
-            userBookingServicesModal.insertBefore(servicesContainer, existingClose || null);
-            if (existingClose) userBookingServicesModal.insertBefore(confirmBtn, existingClose);
-            else userBookingServicesModal.appendChild(confirmBtn);
-
-        } else if (userBookingServicesModal) {
-            const pre = document.createElement('pre');
-            pre.textContent = JSON.stringify(catalog, null, 2);
-            const existingClose = userBookingServicesModal.querySelector('#user-booking-services-modal-close');
-            if (existingClose) userBookingServicesModal.insertBefore(pre, existingClose);
-            else userBookingServicesModal.appendChild(pre);
-        }
+        const renderServicesModal = () => {
+            userBookingServicesModal.innerHTML = `
+                <h2>Select Services</h2>
+                <div id="selected-services">
+                    ${catalog.map(service => {
+                        const serviceName = String(service.name ?? "");
+                        const escapedName = escapeHtml(serviceName);
+                        return `
+                            <label class="card" for="service-${service.id}">
+                                <input type="checkbox" id="service-${service.id}" value="${escapeHtml(service.id)}" data-service-name="${escapedName}" ${selectedServices.has(serviceName) ? "checked" : ""}>
+                                <h3>${escapedName}</h3>
+                                <p>${escapeHtml(service.description)}</p>
+                            </label>
+                        `;
+                    }).join("")}
+                </div>
+                <button id="user-booking-services-modal-close" type="button">Close</button>
+            `;
+        };
 
         selectedServiceDisplay.addEventListener("click", () => {
-            if (userBookingServicesModal) userBookingServicesModal.showModal();
+            renderServicesModal();
+            userBookingServicesModal.showModal();
         });
 
-        if (userBookingServicesModalClose) {
-            userBookingServicesModalClose.addEventListener("click", () => {
-                if (userBookingServicesModal) userBookingServicesModal.close();
-            });
-        }
+        userBookingServicesModal.addEventListener("change", (event) => {
+            if (!event.target.matches("#selected-services input[type='checkbox']")) {
+                return;
+            }
+
+            const serviceName = event.target.dataset.serviceName;
+            if (event.target.checked) {
+                selectedServices.add(serviceName);
+            } else {
+                selectedServices.delete(serviceName);
+            }
+
+            updateSelectedServiceDisplay();
+        });
+
+        userBookingServicesModal.addEventListener("click", (event) => {
+            if (event.target.id === "user-booking-services-modal-close") {
+                userBookingServicesModal.close();
+            }
+        });
 
     }
 
