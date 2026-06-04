@@ -24,3 +24,6 @@ ENV/
 # Flask/runtime artifacts
 instance/
 *.log
+
+
+CBL.db
