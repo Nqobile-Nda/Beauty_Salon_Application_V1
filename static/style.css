@@ -87,15 +87,6 @@ nav a:hover {
 }
 
 
-.flash-container {
-    display: none;
-    padding: 10px;
-    display: flex;
-    border-radius: 10px;
-    margin: 5px 5px;
-}
-
-
 .success {
     background-color: rgb(94, 214, 134);
 }
