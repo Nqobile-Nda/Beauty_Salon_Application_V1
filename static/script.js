@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    const notificationBar = document.querySelector(".notification-bar");
+    const notificationBar = document.querySelectorAll(".notification-bar");
 
     const loginForm = document.getElementById("login-form");
 
