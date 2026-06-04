@@ -1,4 +1,4 @@
-from flask import Flask, render_template, url_for, request, redirect, flash, get_flashed_messages, session
+from flask import Flask, render_template, url_for, request, redirect, flash, get_flashed_messages, session, jsonify
 import time
 import os
 from dotenv import load_dotenv
@@ -28,20 +28,28 @@ if not admin_username or not admin_password_hash:
 booking_requests_table()
 appointments_table()
 
-@app.route("/admin_login", methods=["GET", "POST"])
-def admin_login_route():
-    if request.method == "POST":
-        attempted_username = request.form.get("username")
-        attempted_password = request.form.get("password")
-        next_page = request.args.get("next")
 
-        if admin_username == attempted_username and check_password_hash(admin_password_hash, attempted_password):
-            session["user"] = admin_username
-            flash(f'Welcome {admin_username}!', 'success')
-            return redirect(url_for(next_page) if next_page else url_for('admin_home_route'))
-
-        flash('Invalid Credetials, please try again.', 'error')
+@app.route("/admin_login")
+def admin_login_page():
     return render_template("admin/login.html")
+
+
+@app.route("/api/admin_login", methods=["POST"])
+def admin_login_route():
+    data = request.get_json(silent=True)
+    if not data:
+        return jsonify({"success": False, "message": "Invalid request"}), 400
+
+    attempted_username = data.get("username")
+    attempted_password = data.get("password")
+    next_page = data.get("next") or request.args.get("next")
+
+    if admin_username == attempted_username and check_password_hash(admin_password_hash, attempted_password):
+        session["user"] = admin_username
+        redirect_url = url_for(next_page) if next_page else url_for('admin_home_route')
+        return jsonify({"success": True,"redirect": redirect_url})
+
+    return jsonify({"success": False, "message": "Unsuccessful login attempt!"}), 401
 
 
 @app.route("/")
@@ -50,7 +58,7 @@ def admin_home_route():
     if "user" in session:
         return render_template("admin/home.html")
 
-    return redirect(url_for('admin_login_route', next='admin_home_route'))
+    return redirect(url_for('admin_login_page', next='admin_home_route'))
 
 
 @app.route("/admin_catalog")
@@ -59,13 +67,13 @@ def admin_catalog_route():
         catalog = load_catalog()
         return render_template("admin/catalog.html", catalog=catalog)
 
-    return redirect(url_for('admin_login_route', next='admin_catalog_route'))
+    return redirect(url_for('admin_login_page', next='admin_catalog_route'))
 
 
 @app.route("/admin_catalog/add_item", methods=["GET", "POST"])
 def admin_add_route():
     if "user" not in session:
-        return redirect(url_for('admin_login_route', next='admin_add_route')) 
+        return redirect(url_for('admin_login_page', next='admin_add_route')) 
 
     if request.method == "POST":
         item_name = request.form.get("item_name")
@@ -94,7 +102,7 @@ def admin_add_route():
 @app.route("/admin_catalog/edit/<int:item_id>", methods=["GET", "POST"])
 def edit_item_route(item_id):
     if "user" not in session:
-        return redirect(url_for('admin_login_route', next='edit_item_route', item_id=item_id))
+        return redirect(url_for('admin_login_page', next='edit_item_route', item_id=item_id))
     else:
         catalog = load_catalog()
 
@@ -127,7 +135,7 @@ def edit_item_route(item_id):
 @app.route("/admin_catalog/delete/<int:item_id>")
 def delete_item_route(item_id):
     if "user" not in session:
-        return redirect(url_for('admin_login_route', next='delete_item_route', item_id=item_id))
+        return redirect(url_for('admin_login_page', next='delete_item_route', item_id=item_id))
     
     delete_item(item_id)
     return redirect(url_for("admin_catalog_route"))
@@ -139,13 +147,13 @@ def admin_appointments_route():
         appointments = load_appointments()
         return render_template("admin/appointments.html", appointments=appointments)
 
-    return redirect(url_for('admin_login_route', next='admin_appointments_route'))
+    return redirect(url_for('admin_login_page', next='admin_appointments_route'))
 
 
 @app.route("/admin_create_appointment", methods=["GET","POST"])
 def admin_create_appointment_route():
     if "user" not in session:
-        return redirect(url_for('admin_login_route', next='admin_create_appointment_route'))
+        return redirect(url_for('admin_login_page', next='admin_create_appointment_route'))
 
     if request.method == "POST":
         selected_service = request.form.get("selected-service")
@@ -177,7 +185,7 @@ def admin_create_appointment_route():
 @app.route("/admin_appointments/cancel/<int:appointment_id>")
 def admin_cancel_appointment_route(appointment_id):
     if "user" not in session:
-        return redirect(url_for('admin_login_route', next='admin_cancel_appointment_route', appointment_id=appointment_id))
+        return redirect(url_for('admin_login_page', next='admin_cancel_appointment_route', appointment_id=appointment_id))
 
     appointment = next((item for item in load_appointments() if item.get("appointment_id") == appointment_id), None)
     if appointment is None:
@@ -192,7 +200,7 @@ def admin_cancel_appointment_route(appointment_id):
 @app.route("/admin_appointments/complete/<int:appointment_id>")
 def admin_complete_appointment_route(appointment_id):
     if "user" not in session:
-        return redirect(url_for('admin_login_route', next='admin_complete_appointment_route', appointment_id=appointment_id))
+        return redirect(url_for('admin_login_page', next='admin_complete_appointment_route', appointment_id=appointment_id))
 
     appointment = next((item for item in load_appointments() if item.get("appointment_id") == appointment_id), None)
     if appointment is None:
@@ -210,7 +218,7 @@ def admin_booking_requests_route():
         booking_requests = load_user_booking_requests()
         return render_template("admin/booking_requests.html", booking_requests=booking_requests)
 
-    return redirect(url_for('admin_login_route', next='admin_booking_requests_route'))
+    return redirect(url_for('admin_login_page', next='admin_booking_requests_route'))
 
 
 @app.route("/admin_booking_requests/history")
@@ -219,13 +227,13 @@ def admin_booking_requests_history_route():
         booking_requests = load_user_booking_requests()
         return render_template('admin/booking_history.html', booking_requests=booking_requests)
 
-    return redirect(url_for('admin_login_route', next='admin_booking_requests_history_route'))
+    return redirect(url_for('admin_login_page', next='admin_booking_requests_history_route'))
 
 
 @app.route("/admin_booking_requests/accept/<int:request_id>")
 def admin_booking_request_accept_route(request_id):
     if "user" not in session:
-        return redirect(url_for('admin_login_route', next='admin_booking_request_accept_route', request_id=request_id))
+        return redirect(url_for('admin_login_page', next='admin_booking_request_accept_route', request_id=request_id))
     booking_request = load_specific_user_booking_request(request_id)
     if booking_request is None:
         flash("Booking request not found.", "error")
@@ -250,7 +258,7 @@ def admin_booking_request_accept_route(request_id):
 @app.route("/admin_booking_requests/decline/<int:request_id>")
 def admin_booking_requests_decline_route(request_id):
     if "user" not in session:
-        return redirect(url_for('admin_login_route', next='admin_booking_requests_decline_route', request_id=request_id))
+        return redirect(url_for('admin_login_page', next='admin_booking_requests_decline_route', request_id=request_id))
     
     if update_user_booking_request_status(request_id, "Declined"):
         flash("Booking request declined.", "success")
@@ -264,16 +272,16 @@ def admin_about_route():
     if "user" in session:
         return render_template("admin/about.html")
 
-    return redirect(url_for('admin_login_route', next='admin_about_route'))
+    return redirect(url_for('admin_login_page', next='admin_about_route'))
 
 
 @app.route("/admin_exit")
 def exit_admin_route():
     if "user" in session:
         session.pop("user", None)
-        return redirect(url_for("admin_login_route"))
+        return redirect(url_for("admin_login_page"))
     
-    return redirect(url_for("admin_login_route"))
+    return redirect(url_for("admin_login_page"))
 
 
 @app.route("/user_home")
