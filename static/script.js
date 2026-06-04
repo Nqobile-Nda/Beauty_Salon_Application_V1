@@ -7,13 +7,41 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    const notificationBar = document.querySelector(".notification-bar");
 
-    const flashContainer = document.getElementById("flash-container");
+    const loginForm = document.getElementById("login-form");
 
-    if (flashContainer) {
-        setTimeout(() => {
-            flashContainer.style.display = "none";
-        }, 3000);
+    if (loginForm) {
+        const urlParams = new URLSearchParams(window.location.search);
+        const nextPageQuery = urlParams.get("next");
+
+        loginForm.addEventListener("submit", async (event) => {
+            event.preventDefault();
+
+            const data = {
+                username: loginForm.username.value,
+                password: loginForm.password.value,
+                next: nextPageQuery || loginForm.next?.value || null
+            };
+
+            const response = await fetch("/api/admin_login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json().catch(() => null);
+            if (response.ok && result && result.success && result.redirect) {
+                window.location.href = result.redirect;
+                return;
+            }
+
+            const message = result?.message || "Login failed";
+            console.log(message);
+            if (notificationBar) notificationBar.textContent = message;
+        });
     }
 
 
@@ -56,6 +84,7 @@ document.addEventListener("DOMContentLoaded", () => {
         exitCancelModal.addEventListener("click", () => {
             exitModal.close();
         });
+            
     }
 
 
