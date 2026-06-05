@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (loginForm) {
         const urlParams = new URLSearchParams(window.location.search);
-        const nextPageQuery = urlParams.get("next");
+        const nextPageQuery = urlParams.get("next", "");
 
         loginForm.addEventListener("submit", async (event) => {
             event.preventDefault();
@@ -21,7 +21,12 @@ document.addEventListener("DOMContentLoaded", () => {
             const data = {
                 username: loginForm.username.value,
                 password: loginForm.password.value,
-                next: nextPageQuery || loginForm.next?.value || null
+                next: nextPageQuery || null
+            };
+
+            if (data?.username || data?.password) {
+                notificationBar.textContent = "Please fill in all fields!";
+                return;
             };
 
             const response = await fetch("/api/admin_login", {
