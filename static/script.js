@@ -7,13 +7,13 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    const notificationBar = document.querySelectorAll(".notification-bar");
+    const notificationBar = document.querySelector(".notification-bar");
 
     const loginForm = document.getElementById("login-form");
 
     if (loginForm) {
         const urlParams = new URLSearchParams(window.location.search);
-        const nextPageQuery = urlParams.get("next", "");
+        const nextPageQuery = urlParams.get("next");
 
         loginForm.addEventListener("submit", async (event) => {
             event.preventDefault();
@@ -24,10 +24,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 next: nextPageQuery || null
             };
 
-            if (data?.username || data?.password) {
+            if (!data.username || !data.password) {
                 notificationBar.textContent = "Please fill in all fields!";
                 return;
-            };
+            }
 
             const response = await fetch("/api/admin_login", {
                 method: "POST",
@@ -45,9 +45,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const message = result?.message || "Login failed";
             console.log(message);
-            if (notificationBar) notificationBar.textContent = message;
+            if (notificationBar) {
+                notificationBar.textContent = message;
+            }
         });
     }
+
+
+    const viewCatalogBtn = document.getElementById("view-catalog-btn");
+    viewCatalogBtn.addEventListener("click", () => {
+        window.location.href = "/admin_catalog"
+    });
 
 
     const itemCard = document.querySelectorAll(".admin-item-card");
