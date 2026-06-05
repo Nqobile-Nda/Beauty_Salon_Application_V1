@@ -79,7 +79,7 @@ def admin_add_route():
         item_name = request.form.get("item_name")
         item_price = request.form.get("item_price")
         item_category = request.form.get("item_category")
-        item_image = request.files['item_image']
+        item_image = request.files.get("item_image")
         item_description = request.form.get("item_description")
         item_created_at = time.strftime("%Y-%m-%d %H:%M:%S")
         item_updated_at = "Not updated yet"
@@ -107,6 +107,8 @@ def edit_item_route(item_id):
         catalog = load_catalog()
 
         item = next((item for item in catalog if item.get("item_id") == item_id), None)
+        if item is None:
+            return redirect(url_for("admin_catalog_route"))
 
         if request.method == "POST":
             item_name = request.form.get("item_name")
