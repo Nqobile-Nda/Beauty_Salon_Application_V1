@@ -87,6 +87,11 @@ nav a:hover {
 }
 
 
+.hero img {
+    max-width: 100px;
+}
+
+
 .success {
     background-color: rgb(94, 214, 134);
 }
