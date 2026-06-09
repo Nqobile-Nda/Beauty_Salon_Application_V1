@@ -89,6 +89,7 @@ nav a:hover {
 
 .hero img {
     max-width: 100px;
+    display: block;
 }
 
 
