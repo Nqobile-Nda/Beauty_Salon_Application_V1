@@ -3,9 +3,18 @@
 {% block title %}Home{% endblock %}
 
 {% block content %}
+
+    <h1>Carol's Beauty Lounge</h1>
+
     <section class="hero">
-        <h1>Carol's Beauty Lounge</h1>
+        <div class="home-hero-overlay">
+        <div class="hero-text">
+            <p>Manage your beauty lounge with ease. From updating your catalog to scheduling appointments, everything is just a click away.</p>
+            <button id="view-catalog-btn" type="button">View Catalog</button>
+        </div>
+        
         <img src="{{ url_for('static', filename='images/imageError.webp') }}">
-        <button id="view-catalog-btn" type="button">View Catalog</button>
+        </div>
     </section>
+
 {% endblock %}

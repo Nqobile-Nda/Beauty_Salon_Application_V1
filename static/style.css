@@ -87,24 +87,28 @@ nav a:hover {
 }
 
 
+.home-hero-overlay {
+    display: flex;
+    flex-direction: row;
+    text-align: center;
+    gap: 20px;
+    max-width: 100%;
+    margin: 0 auto;
+}
+
+
+.hero-text {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    justify-content: center;
+}
+
+
 .hero img {
-    max-width: 100px;
-    display: block;
-}
-
-
-.success {
-    background-color: rgb(94, 214, 134);
-}
-
-
-.error {
-    background-color: rgb(233, 93, 93);
-}
-
-
-.flash-container p {
-    margin: 0px;
+    max-width: 100%;
+    height: auto;
+    border-radius: 12px;
 }
 
 
