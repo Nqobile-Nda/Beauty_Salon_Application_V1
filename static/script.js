@@ -54,18 +54,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const viewCatalogBtn = document.getElementById("view-catalog-btn");
     viewCatalogBtn.addEventListener("click", () => {
-        window.location.href = "/admin_catalog"
+        window.location.href = "/admin_catalog";
     });
 
 
-    const itemCard = document.querySelectorAll(".admin-item-card");
-    const itemCardModal = document.getElementById("admin-item-card-modal");
-    const itemImageModal = document.getElementById("admin-item-image-modal");
-    const itemCategoryModal = document.getElementById("admin-item-category-modal");
-    const itemNameModal = document.getElementById("admin-item-name-modal");
-    const itemPriceModal = document.getElementById("admin-item-price-modal");
-    const itemDescriptionModal = document.getElementById("admin-item-description-modal");
-    const itemCloseButton = document.getElementById("admin-item-close-modal");
+    async function loadCatalog() {
+        const response = await fetch("/api/admin_catalog");
+        const catalog = await response.json();
+        return catalog;
+    }
+
+
+    const catalogCards = document.querySelector(".admin-catalog-cards")
+
+    async function renderCatalogCards() {
+        const catalog = await loadCatalog();
+        catalogCards.forEach(card => {
+            card.innerHTML = catalog.map(item => `
+                <img src="/static/${item.image}" alt="${item.name}">
+                <p>${item.name}</p>
+            `).join('');
+        });
+    }
+    
 
     if (itemCard.length && itemCardModal && itemImageModal && itemCategoryModal && itemNameModal && itemPriceModal && itemDescriptionModal && itemCloseButton) {
         itemCard.forEach(card => {
@@ -335,6 +346,10 @@ document.addEventListener("DOMContentLoaded", () => {
         appointmentCancelCancelModal.addEventListener("click", () => {
             appointmentCancelModal.close();
         });
+    }
+
+    if (catalogCards) {
+        renderCatalogCards();
     }
 });
 
