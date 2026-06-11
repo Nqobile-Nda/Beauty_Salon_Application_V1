@@ -62,12 +62,17 @@ def admin_home_route():
 
 
 @app.route("/admin_catalog")
-def admin_catalog_route():
+def admin_catalog_page():
     if "user" in session:
-        catalog = load_catalog()
-        return render_template("admin/catalog.html", catalog=catalog)
+        return render_template("admin/catalog.html")
 
-    return redirect(url_for('admin_login_page', next='admin_catalog_route'))
+    return redirect(url_for('admin_login_page', next='admin_catalog_page'))
+
+
+@app.route("/api/admin_catalog")
+def admin_catalog_route():
+    catalog = load_catalog()
+    return jsonify(catalog)
 
 
 @app.route("/admin_catalog/add_item", methods=["GET", "POST"])
