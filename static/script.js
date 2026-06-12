@@ -1,4 +1,4 @@
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async() => {
     const hamburger = document.getElementById("hamburger");
     const navLinks = document.getElementById("nav-links");
     if (hamburger && navLinks) {
@@ -53,9 +53,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     const viewCatalogBtn = document.getElementById("view-catalog-btn");
-    viewCatalogBtn.addEventListener("click", () => {
-        window.location.href = "/admin_catalog";
-    });
+    if (viewCatalogBtn) {
+        viewCatalogBtn.addEventListener("click", () => {
+            window.location.href = "/admin_catalog";
+        });
+    }
 
 
     async function loadCatalog() {
@@ -65,35 +67,47 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
-    const catalogCards = document.querySelector(".admin-catalog-cards")
+    const catalogCards = document.querySelector(".admin-catalog-cards");
 
     async function renderCatalogCards() {
         const catalog = await loadCatalog();
-        catalogCards.forEach(card => {
-            card.innerHTML = catalog.map(item => `
+        if (!catalogCards) return;
+
+        catalogCards.innerHTML = catalog.map(item => `
+            <div class="card admin-item-card" data-name="${item.name}" data-category="${item.category}" data-price="${item.price}" data-image="${item.image}" data-description="${item.description}">
                 <img src="/static/${item.image}" alt="${item.name}">
-                <p>${item.name}</p>
-            `).join('');
-        });
-    }
-    
+                <strong>${item.name}</strong>
+                <p>Price: R${item.price}</p>
+            </div>
+        `).join('');
 
-    if (itemCard.length && itemCardModal && itemImageModal && itemCategoryModal && itemNameModal && itemPriceModal && itemDescriptionModal && itemCloseButton) {
-        itemCard.forEach(card => {
-            card.addEventListener("click", (event) => {
-                event.stopPropagation();
-                itemImageModal.src = "/static/" + card.dataset.image;
-                itemCategoryModal.textContent = `Category: ${card.dataset.category}`;
-                itemNameModal.textContent = `Name: ${card.dataset.name}`;
-                itemPriceModal.textContent = `Price: R${card.dataset.price}`;
-                itemDescriptionModal.innerHTML = `Description:</br>${card.dataset.description}`;
-                itemCardModal.showModal();
+        // attach click listeners to the newly-rendered admin cards
+        const adminCards = catalogCards.querySelectorAll('.admin-item-card');
+        const itemCardModal = document.getElementById('admin-item-card-modal');
+        const itemImageModal = document.getElementById('admin-item-image-modal');
+        const itemCategoryModal = document.getElementById('admin-item-category-modal');
+        const itemNameModal = document.getElementById('admin-item-name-modal');
+        const itemPriceModal = document.getElementById('admin-item-price-modal');
+        const itemDescriptionModal = document.getElementById('admin-item-description-modal');
+        const itemCloseButton = document.getElementById('admin-item-close-modal');
+
+        if (adminCards.length && itemCardModal && itemImageModal && itemCategoryModal && itemNameModal && itemPriceModal && itemDescriptionModal && itemCloseButton) {
+            adminCards.forEach(card => {
+                card.addEventListener('click', (event) => {
+                    event.stopPropagation();
+                    itemImageModal.src = "/static/" + card.dataset.image;
+                    itemCategoryModal.textContent = `Category: ${card.dataset.category}`;
+                    itemNameModal.textContent = card.dataset.name;
+                    itemPriceModal.textContent = `Price: R${card.dataset.price}`;
+                    itemDescriptionModal.textContent = `Description: ${card.dataset.description}`;
+                    itemCardModal.showModal();
+                });
             });
-        });
 
-        itemCloseButton.addEventListener("click", () => {
-            itemCardModal.close();
-        });
+            itemCloseButton.addEventListener('click', () => {
+                itemCardModal.close();
+            });
+        }
     }
 
     const exitPrompt = document.getElementById("exit-prompt");
