@@ -2,11 +2,12 @@
 
 {% block content %}
 
-<h1>Catalog</h1>
+<div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between mb-4">
+    <h1 class="mb-3 mb-md-0">Catalog</h1>
+    <a href="{{ url_for('admin_add_route') }}" class="btn btn-success">Add Item</a>
+</div>
 
-<a href="{{ url_for('admin_add_route') }}"><button type="button">Add</button></a>
-
-<div class="admin-catalog-cards catalog_cards"></div>
+<div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4 admin-catalog-cards catalog_cards"></div>
 
 <dialog id="admin-item-card-modal">
     <div class="modal-media-layout">

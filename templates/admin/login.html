@@ -2,18 +2,21 @@
 
 {% block content %}
 
-<div class="login-form">
-    <form id="login-form">
-    <h1>Admin Login</h1>
-    <label>Username:</label>
-    <input name="username" title="username" value="user">
-
-    <label>Password:</label>
-    <input name="password" title="password" type="password" value="password">
-    
-    <button type="submit">Login</button>
-    
-    <div class="page-links"><a href="{{ url_for('user_home_route') }}">Not an admin?</a></div>
-    </form>
+<div class="row justify-content-center py-5">
+    <div class="col-12 col-md-8 col-lg-5">
+        <form id="login-form" class="card p-4 shadow-sm">
+            <h1 class="h3 mb-4 text-center">Admin Login</h1>
+            <div class="mb-3">
+                <label class="form-label">Username</label>
+                <input class="form-control" name="username" title="username" value="user" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Password</label>
+                <input class="form-control" name="password" title="password" type="password" value="password" required>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Login</button>
+            <div class="text-center mt-3"><a href="{{ url_for('user_home_route') }}">Not an admin?</a></div>
+        </form>
+    </div>
 </div>
 {% endblock %}

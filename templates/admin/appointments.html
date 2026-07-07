@@ -2,27 +2,30 @@
 
 {% block content %}
 
-<h1>Appointments({{ appointments | length }})</h1>
-
-<div class = "page-links">
-<a href="{{ url_for('admin_create_appointment_route') }}">Create Appointment</a>
-<a href="{{ url_for('admin_booking_requests_route') }}">View Requests</a>
-</div>
-
-<div class="appointment-row">
-
-{% for item in appointments %}
-<div class="card appointment-card" data-appointment-id="{{ item.appointment_id }}" data-request-id="{{ item.request_id }}" data-name="{{ item.full_name }}" data-service="{{ item.selected_service }}" data-email="{{ item.email }}" data-phone="{{ item.phone }}" data-date="{{ item.date }}" data-time="{{ item.time }}" data-message="{{ item.message }}" data-created-by="{{ item.created_by }}">
-    <p>{{ item.full_name }}</p>
-    <p>{{ item.selected_service }}</p>
-    <p>{{ item.date}} {{ item.time }}</p>
-    <div class="button-row">
-    <button type="button" class="appointment-complete">Completed</button>
-    <button type="button" class="appointment-cancel">Canceled</button>
+<div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between mb-4">
+    <h1>Appointments ({{ appointments | length }})</h1>
+    <div class="btn-group">
+        <a href="{{ url_for('admin_create_appointment_route') }}" class="btn btn-success">Create Appointment</a>
+        <a href="{{ url_for('admin_booking_requests_route') }}" class="btn btn-outline-secondary">View Requests</a>
     </div>
 </div>
-{% endfor %}
 
+<div class="row row-cols-1 row-cols-md-2 g-4">
+{% for item in appointments %}
+    <div class="col">
+        <div class="card h-100 shadow-sm appointment-card" data-appointment-id="{{ item.appointment_id }}" data-request-id="{{ item.request_id }}" data-name="{{ item.full_name }}" data-service="{{ item.selected_service }}" data-email="{{ item.email }}" data-phone="{{ item.phone }}" data-date="{{ item.date }}" data-time="{{ item.time }}" data-message="{{ item.message }}" data-created-by="{{ item.created_by }}">
+            <div class="card-body">
+                <h5 class="card-title">{{ item.full_name }}</h5>
+                <p class="card-text mb-1">Service: {{ item.selected_service }}</p>
+                <p class="card-text mb-3">{{ item.date }} {{ item.time }}</p>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-outline-success btn-sm appointment-complete">Completed</button>
+                    <button type="button" class="btn btn-outline-danger btn-sm appointment-cancel">Canceled</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endfor %}
 </div>
 
 <dialog id="appointment-modal">

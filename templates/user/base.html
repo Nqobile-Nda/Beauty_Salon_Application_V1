@@ -4,26 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Carol's Beauty Lounge{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T6L9u0DVCZwNmmQ3xiyxCg+0qZ3KYw5t2Lr852DmQokxG1Cj7eH8w4Svz2fkg+2d" crossorigin="anonymous">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-<body>
-    <nav>
-        <div class="hamburger" id="hamburger">
-            <span></span>
-            <span></span>
-            <span></span>
-        </div>
-        <div class="nav-links" id="nav-links">
-            <a href="{{ url_for('user_home_route') }}" class="{% if request.endpoint == 'user_home_route' %}active{% endif %}">Home</a>
-            <a href="{{ url_for('user_catalog_route') }}" class="{% if request.endpoint in ['user_catalog_route', 'filtered_catalog_route'] %}active{% endif %}">Catalog</a>
-            <a href="{{ url_for('user_booking_requests_route') }}" class="{% if request.endpoint == 'user_booking_requests_route' %}active{% endif %}">Booking Requests</a>
-            <a href="{{ url_for('user_about_route') }}" class="{% if request.endpoint == 'user_about_route' %}active{% endif %}">About Us</a>
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="{{ url_for('user_home_route') }}">Carol's Beauty Lounge</a>
+            <button class="navbar-toggler" type="button" id="hamburger" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="nav-links navbar-nav ms-auto align-items-center" id="nav-links">
+                <a class="nav-link {% if request.endpoint == 'user_home_route' %}active{% endif %}" href="{{ url_for('user_home_route') }}">Home</a>
+                <a class="nav-link {% if request.endpoint in ['user_catalog_route', 'filtered_catalog_route'] %}active{% endif %}" href="{{ url_for('user_catalog_route') }}">Catalog</a>
+                <a class="nav-link {% if request.endpoint == 'user_booking_requests_route' %}active{% endif %}" href="{{ url_for('user_booking_requests_route') }}">Booking Requests</a>
+                <a class="nav-link {% if request.endpoint == 'user_about_route' %}active{% endif %}" href="{{ url_for('user_about_route') }}">About Us</a>
+            </div>
         </div>
     </nav>
 
-    <p class="notification-bar"></p>
+    <div class="notification-bar container mt-4"></div>
 
     <script src="{{ url_for('static', filename='script.js') }}"></script>
-<main>{% block content %}{% endblock %}</main>
+    <main class="container py-4">{% block content %}{% endblock %}</main>
 </body>
 </html>
