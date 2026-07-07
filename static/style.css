@@ -1,0 +1,88 @@
+:root {
+    color-scheme: light;
+}
+
+body {
+    background: #f8f9fa;
+    min-height: 100vh;
+}
+
+main {
+    padding-top: 1rem;
+}
+
+.navbar-brand {
+    font-size: 1.1rem;
+}
+
+.nav-links {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 991px) {
+    .nav-links {
+        display: none;
+        width: 100%;
+        flex-direction: column;
+        margin-top: 0.75rem;
+    }
+    .nav-links.open {
+        display: flex;
+    }
+}
+
+.notification-bar {
+    min-height: 2rem;
+    color: #842029;
+    background: #f8d7da;
+    border: 1px solid #f5c2c7;
+    border-radius: 0.35rem;
+    padding: 0.9rem 1rem;
+    margin-bottom: 1rem;
+    display: none;
+}
+
+.notification-bar.show {
+    display: block;
+}
+
+.card img,
+.card video {
+    object-fit: cover;
+    max-height: 260px;
+}
+
+.hero {
+    background: #ffffff;
+    border-radius: 1rem;
+    padding: 2rem;
+    box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.08);
+}
+
+.hero h1,
+.hero p {
+    margin-bottom: 1rem;
+}
+
+.dialog-content {
+    padding: 1.5rem;
+}
+
+.dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    padding-top: 1rem;
+}
+
+.page-links a {
+    margin-right: 0.75rem;
+}
+
+button,
+.btn {
+    min-width: 115px;
+}
